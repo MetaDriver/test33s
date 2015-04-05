@@ -369,11 +369,11 @@
     flex-flow: column nowrap;
     justify-content: flex-start;
     align-items: stretch;
-    border: 1px solid hsla(33, 33%, 33%, 0.8);
-    border-radius: 12px;
-    box-shadow: 2px 2px 6px 4px hsla(50, 7%, 50%,0.3),
-       inset 2px 2px 8px 0 hsla(50, 7%, 99%,0.99),
-       inset -2px -2px 6px 0 hsla(50, 7%, 50%,0.4);
+    border: 1px solid hsla(33, 7%, 83%, 0.8);
+    border-radius: 4px;
+    box-shadow: 2px 2px 6px 4px hsla(50, 7%, 50%,0.1),
+       inset 1px 1px 4px 0 hsla(50, 7%, 99%,0.7),
+       inset -1px -1px 3px 0 hsla(50, 7%, 50%,0.2);
     /*overflow: auto;*/
 }
 .todo-container {
@@ -476,7 +476,7 @@
 .todo-item>div {
     flex: 0 1 auto;
     align-self: stretch;
-    margin: 1px 4px;
+    margin: 1px 0px;
     /*margin: 10px 4px 4px 4px;*/
     border-radius: 4px;
     padding: 6px;
@@ -485,7 +485,7 @@
     position: relative;
 }
 .todo-item>div.todo-text {
-    width: 50%;
+    width: 75%;
 }
 .todo-item>div.todo-start,
 .todo-item>div.todo-end {
@@ -504,7 +504,7 @@
 .todo-item>div>div.label,
 .todo-item>div>div.done-label {
     align-self: flex-start;
-    margin: -4px -3px 0 -1px;
+    margin: -5px 0 0 -4px;
     padding: 1px 8px 1px 4px;
     background-color: hsla(202,15%,90%,1);
     color: #447;
@@ -547,7 +547,7 @@
     position: relative;
 }
 .todo-item>div.todo-delete>div {
-    margin: -4px 2px 0 -1px;
+    margin: -4px 4px 0 -4px;
     position: absolute;
     height: 12px;
     width: 12px;
@@ -568,7 +568,7 @@
     padding: 2px 4px;
     font-size: 90%;
     color: #542;
-    border: 1px solid #764;
+    border: 1px solid #eee;
     border-radius: 4px;
     white-space: nowrap;
     overflow: hidden;
