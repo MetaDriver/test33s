@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html ng-app="my33app">
+
+<head>
+   <title>Тестовое задание для 33 слонов</title>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <base href="/test33s/">
+
+   <!-- CSS -->
+   <link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
+   <link href="css/app.css" rel="stylesheet" />
+
+</head>
+
+<!--<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  BODY  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-->
+<body class="app-null" ng-controller="tabsCtrl">
+   <!-- App tabs -->
+   <tabset class="app-tabs" >
+      <tab  heading=" Задание 1 " active="$storage.tabs[0].active">
+         <section ng-include="'partials/test1.html'"></section>
+      </tab>
+      <tab  heading=" Задание 2 " active="$storage.tabs[1].active">
+         <section ng-include="'partials/test2.html'"></section>
+      </tab>
+   </tabset>
+
+<!--<<<<<<<<<<<<<<<<<<<<<<<<<<<<<  End BODY  >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>-->
+<!-- JQuery -->
+<script src="vendors/jQuery_2-1-1/jquery-2.1.1.min.js"></script>
+<!-- JQuery UI -->
+<!--<script src="vendors/jquery-ui-1.10.4.custom/js/jquery-ui-1.10.4.custom.min.js"></script>-->
+
+<!-- Angular -->
+<script src="vendors/angular_1.3.0/angular.min.js"></script>
+<script src="vendors/angular_1.3.0/angular-sanitize.min.js"></script>
+<script src="vendors/angular_1.3.0/angular-animate.min.js"></script>
+
+<!-- ng-UI-Bootstrap -->
+<script src="vendors/ng-ui/ui-bootstrap-tpls-0.11.0.min.js"></script>
+
+<!--<script src="vendors/ng-dragdrop/ngDraggable.js"></script>-->
+
+<!-- Storages -->
+<!--<script src='vendors/ngstorage/ngStorage.js'></script>-->
+<script src='vendors/ngstorage/ngStorage.min.js'></script>
+
+<script src="js/test-app.js"></script>
+<!--<script src="js/common-app.min.js"></script>-->
+
+</body>
+</html>
