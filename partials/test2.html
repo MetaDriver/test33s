@@ -31,8 +31,9 @@
                <div class="todo-content" ng-class="taskStatus($index)">{{todo.taskEnd | date:"dd.MMMM.yyyy hh:mm"}}</div>
             </div>
             <div class="todo-done">
-               <div class="done-label" ng-class="taskStatus($index)">Cделано</div>
                <input type="checkbox" value="false" ng-model="todo.taskDone">
+               <div class="done-label" ng-class="taskStatus($index)"
+                    ng-click="todo.taskDone=!todo.taskDone">Cделано</div>
             </div>
             <div class="todo-delete">
                <div ng-show="taskStatus($index)" title="удалить задачу" ng-click="deleteTask($index)"></div>
