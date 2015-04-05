@@ -316,7 +316,7 @@
 .tmb {
     flex: 0 0 auto;
     margin: 5px;
-    /*top: 0;*/
+    top: 0;
     /*left: 0;*/
     height: 40px;
     width: 40px;
