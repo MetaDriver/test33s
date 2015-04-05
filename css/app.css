@@ -276,6 +276,10 @@
     flex: 0 0 auto;
     height: 40px;
     box-shadow: inset 1px 1px 16px 0 hsla(55, 0%, 10%, 0.35);
+
+
+    display: flex;  /* Отладка (для кнопки очистки) */
+    flex-flow: row wrap;  /* Отладка (для кнопки очистки) */
 }
 .cancel-sb-button {
     margin: 12px 8px;

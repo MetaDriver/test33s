@@ -25,7 +25,7 @@ angular.module('my33app',
       function($scope, $element, $timeout, $localStorage) {
          $scope.storage = $localStorage;
          $scope.ddHandlerOn = false;
-         $scope.sBarShowComplete = false;
+//         $scope.sBarShowComplete = false;
          $scope.sourceShow = true;
          $scope.srcTrans = '';
 
@@ -55,6 +55,10 @@ angular.module('my33app',
          $scope.addPreview = function() {
             $scope.storage.previewList.push({ hidden: false });
          };
+
+         $scope.clearList = function() {
+            $scope.storage.previewList = [];
+         }
 //         function fillList(n) {  for(var i = 0; i<n; i++) $scope.addPreview(); }
 
          $scope.delView = function(n){
@@ -67,10 +71,10 @@ angular.module('my33app',
             $scope.storage.sBarShow = true;
             // запускаем
 //            $scope.$apply();
-            $timeout(function(){
-               $scope.sBarShowComplete = true;
-//               $scope.$apply();
-            },900);
+//            $timeout(function(){
+//               $scope.sBarShowComplete = true;
+////               $scope.$apply();
+//            },900);
          };
       }
    ])
@@ -91,11 +95,11 @@ angular.module('my33app',
             $scope.startX = event.clientX;
             $scope.startY = event.clientY;
 
-            $scope.offsPointX = $scope.sourceX+100 - event.clientX;
-            $scope.offsPointY = $scope.sourceY+100 - event.clientY;
+//            $scope.offsPointX = $scope.sourceX+100 - event.clientX;
+//            $scope.offsPointY = $scope.sourceY+100 - event.clientY;
 
-            $scope.zoomPX = 1- $scope.offsPointX  / $scope.offsetX;
-            $scope.zoomPY = 1- $scope.offsPointY  / $scope.offsetY;
+            $scope.zoomPX = 1; // - $scope.offsPointX  / $scope.offsetX;   временно отключаю зум
+            $scope.zoomPY = 1; // - $scope.offsPointY  / $scope.offsetY;   потом включить!
 
 //            $scope.targetX = $scope.$parent.winWidth - $scope.startX -
 //               195 + $scope.$parent.previewList.length % 4 * 50;
@@ -103,6 +107,7 @@ angular.module('my33app',
 
             $scope.dZoom = 0.6 / $scope.offsetX;
 
+            $scope.dragOn = true;
 //            console.log('$scope.sBarShow = ', $scope.sBarShow);
 //            console.log('$scope.offsetX = ', $scope.offsetX);
 //            console.log('$scope.offsetY = ', $scope.offsetY);
@@ -124,10 +129,14 @@ angular.module('my33app',
             $scope.sourceX = getOffset($scope.sourceImg, 'offsetLeft');
             $scope.sourceY = getOffset($scope.sourceImg, 'offsetTop');
 
-            $scope.offsetX = $scope.sourceX - $scope.targetX + 2;
-            $scope.offsetY = $scope.sourceY - $scope.targetY + 2;
+            $scope.trueOffsetX = $scope.sourceX - $scope.targetX + 2; // + (77+$scope.$parent.storage.previewList.length%4*50)
+            $scope.offsetX = $scope.sourceX - $scope.$parent.winWidth + 204;
+//            $scope.offsetY = $scope.sourceY - $scope.targetY + 2;
+            $scope.offsetY = $scope.sourceY - $scope.targetY + 2 -
+               (($scope.$parent.storage.previewList.length % 4) > 0) * 50;
+//            (77+$scope.$parent.storage.previewList.length%4*50)
 
-            $scope.dragOn = true;
+
 
             $scope.dX = 0;
             $scope.dY = 0;
@@ -135,8 +144,8 @@ angular.module('my33app',
             $scope.dZoom = 0;
             var
                dragStyles = 'transition:none;opacity:0.85;box-shadow:4px 4px 1px 0 hsla(0,0%,50%,0.6);cursor:move;',
-               stdStyles = 'transition:all ease 0.6s;opacity:1;box-shadow:none;cursor:default;';
-            $scope.constGragStyles = stdStyles;
+               staticStyles = 'transition:all ease 0.6s;opacity:1;box-shadow:none;cursor:default;';
+            $scope.cloneStyles =   staticStyles;
 
             // оригинал исчезает
 //            $scope.$parent.srcTrans = 'transition:none';
@@ -163,7 +172,7 @@ angular.module('my33app',
 //               console.log('$scope.$parent.winWidth = ', $scope.$parent.winWidth);
 //               console.log('event.clientX = ', event.clientX);
 
-               $scope.constGragStyles = dragStyles;
+               $scope.cloneStyles = dragStyles;
 
                $scope.$parent.sourceShow = false;
 
@@ -187,7 +196,7 @@ angular.module('my33app',
                $scope.dY = 0;
                $scope.scale = 1;
 
-               $scope.constGragStyles = stdStyles;
+               $scope.cloneStyles = staticStyles;
                $scope.$parent.sbLighter = 0;
 //               $scope.sourceShow = true;
                $scope.$parent.sourceShow = true;
@@ -202,7 +211,7 @@ angular.module('my33app',
                $scope.dY =  - $scope.offsetY -127;
                $scope.scale = 0.2;
 
-               $scope.constGragStyles = stdStyles;
+               $scope.cloneStyles = staticStyles;
                $timeout(function(){
 
                   $scope.$parent.sbLighter = 0;

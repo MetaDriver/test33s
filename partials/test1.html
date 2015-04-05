@@ -14,6 +14,7 @@
 
       <div class="btn-wrapper">
          <div class="cancel-sb-button" ng-click="storage.sBarShow=false"></div>
+         <button ng-click="clearList()">Очистить список</button>
       </div>
 
       <div class="img-collect-panel" style="background-color: hsla(0,0%,{{sbLighter}}%,0.3)">
@@ -23,7 +24,9 @@
             <img src="img/40x40.jpg" />
          </div>
 
-         <div ng-show="!small && sBarShowComplete" ng-controller="ddCtrl"
+
+         <!--sBarShowComplete-->
+         <div ng-show="!small && storage.sBarShow" ng-controller="ddCtrl"
               style="padding: 0;
               margin: 0;
               z-index: 999;
@@ -33,7 +36,8 @@
                   0,{{scale}},0,0,
                   0,0,1,0,
                   {{offsetX + dX - poX}},{{offsetY + dY - poY}},0,1);
-                     {{constGragStyles}}">
+                     {{cloneStyles}}">
+            <!--{{offsetX + dX - poX}},{{offsetY + dY - poY}},0,1);-->
             <div ng-if="dragOn" class="tmb pw-place">
                <img  src="img/200x200.jpg" />
             </div>
