@@ -45,7 +45,7 @@
 
    </section>
 
-   <div class="menu" ng-click="sideBarShow()" ng-class="(storage.sBarShow || small) ? '' : 'covered'"
+   <div class="menu" ng-click="storage.sBarShow=true" ng-class="(storage.sBarShow || small) ? '' : 'covered'"
          style="z-index: {{50-50*storage.sBarShow}}">
    </div>
 

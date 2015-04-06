@@ -17,15 +17,12 @@ angular.module('my33app',
             sBarShow: false,
             todoList: []
          });
-//         $scope.selectTab = function(n) {
-//            $scope.$storage.tabs[n].active = true;
-//         }
-}])
+      }
+   ])
    .controller('test_1_Ctrl', ['$scope', '$element', '$timeout', '$localStorage',
       function($scope, $element, $timeout, $localStorage) {
          $scope.storage = $localStorage;
          $scope.ddHandlerOn = false;
-//         $scope.sBarShowComplete = false;
          $scope.sourceShow = true;
          $scope.sourceShowBreak = '{}';
          $scope.srcTrans = '';
@@ -39,10 +36,6 @@ angular.module('my33app',
          };
          $scope.small = false;
          $timeout(function() { $scope.small = collapsedToSmall(); $scope.$apply(); }, 500);
-//         console.log('$scope.winHeight = ', $scope.winHeight);
-//         console.log('$scope.winWidth = ', $scope.winWidth);
-//         console.log('$scope.small = ', $scope.small);
-//         console.log('$scope.storage.sBarShow = ', $scope.storage.sBarShow);
          $scope.clientSize = function (){
             $scope.winHeight = $( window ).height() - 42;
             $scope.winWidth = $( window ).width();
@@ -64,17 +57,6 @@ angular.module('my33app',
             $scope.storage.previewList[n].hidden = true;
             $scope.$apply();
             $timeout(function() { $scope.storage.previewList.splice(n,1) }, 800);
-         };
-//         fillList(4);
-
-         $scope.sideBarShow = function() {
-            $scope.storage.sBarShow = true;
-            // запускаем
-//            $scope.$apply();
-//            $timeout(function(){
-//               $scope.sBarShowComplete = true;
-////               $scope.$apply();
-//            },900);
          };
       }
    ])
@@ -99,30 +81,20 @@ angular.module('my33app',
 
             $scope.startX = event.clientX;
             $scope.startY = event.clientY;
-//
-//            $scope.zoomPX = 1;
-//            $scope.zoomPY = 1;
 
             $scope.dZoom = 0.4 / $scope.offsetX;
 
             $scope.cloneStyles = dragStyles;
             $scope.dragOn = true;
 
-//            pp.sourceShow = false;
-//            console.log('$scope.sBarShow = ', $scope.sBarShow);
-//            console.log('$scope.offsetX = ', $scope.offsetX);
-//            console.log('$scope.offsetY = ', $scope.offsetY);
-//            console.log('$scope.dX = ', $scope.dX);
-//            console.log('$scope.dY = ', $scope.dY);
-//            console.log('$element = ', $element);
             return false;
          }
 
          function init() {
             $scope.cloneX = getOffset($scope.cloneImg, 'offsetLeft');
             $scope.cloneY = getOffset($scope.cloneImg, 'offsetTop');
-console.log("$scope.cloneX = ",$scope.cloneX);
-console.log("$scope.cloneY = ",$scope.cloneY);
+//console.log("$scope.cloneX = ",$scope.cloneX);
+//console.log("$scope.cloneY = ",$scope.cloneY);
 
             $scope.targetX = getOffset($scope.targetPlace, 'offsetLeft') +
                (pp.storage.previewList.length+1) % 4 * 50;
