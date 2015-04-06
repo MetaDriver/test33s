@@ -1,45 +1,34 @@
 <div class="test contur" ng-controller="test_1_Ctrl">
 
-   <div id="cloneImg" ng-show="!small && storage.sBarShow" ng-controller="ddCtrl"
-        style="
-         position: absolute; z-index: 999; border-radius: 5px;
-               transform: matrix3d( {{scale}},0,0,0,  0,{{scale}},0,0,
+   <div id="cloneImg" class="clone"
+        ng-show="!small && storage.sBarShow" ng-controller="ddCtrl"
+        style="transform: matrix3d( {{scale}},0,0,0,  0,{{scale}},0,0,
                   0,0,1,0, {{-2+sourceX + dX}},{{-48+sourceY + dY}},0,1);
                      {{cloneStyles}}">
-
       <div ng-if="dragOn" class="tmb pw-place">
          <img  src="img/200x200.jpg" />
       </div>
    </div>
 
    <section class="body-test-1 contur" style="overflow: visible;">
-
       <div class="square" ng-class="small ? 'small' : ''">
-         <div id="sourceImg" class="scr-img" ng-show="sourceShow" ng-style="sourceShowBreak"
+         <div id="sourceImg" class="scr-img" ng-show="sourceShow"
                ng-class="noAnimate?'no-animate':''">
             <img src="img/200x200.jpg" />
          </div>
       </div>
-
    </section>
 
    <section id="targetPlace" class="side-bar contur" style="overflow: visible;" ng-show="!small && storage.sBarShow">
-
       <div class="btn-wrapper" ng-dblclick="clearList()">
          <div class="cancel-sb-button" ng-click="storage.sBarShow=false"></div>
-         <!--<button ng-click="clearList()">Очистить список</button>-->
       </div>
-
       <div class="img-collect-panel" style="background-color: hsla(0,0%,{{sbLighter}}%,0.3)">
-
          <div class="tmb" ng-repeat="preview in storage.previewList" ng-hide="preview.hidden">
             <div class="pv-close-button" ng-click="delView($index)"></div>
             <img src="img/40x40.jpg" />
          </div>
-
-
       </div>
-
    </section>
 
    <div class="menu" ng-click="storage.sBarShow=true" ng-class="(storage.sBarShow || small) ? '' : 'covered'"

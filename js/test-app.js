@@ -22,13 +22,12 @@ angular.module('my33app',
    .controller('test_1_Ctrl', ['$scope', '$element', '$timeout', '$localStorage',
       function($scope, $element, $timeout, $localStorage) {
          $scope.storage = $localStorage;
-         $scope.ddHandlerOn = false;
+         $scope.ddHandlerOn = false;  // флаг dragStart, для предотвращения повторного навешивания обработчика
          $scope.sourceShow = true;
-         $scope.sourceShowBreak = '{}';
-         $scope.srcTrans = '';
-         $scope.noAnimate = false;
+         $scope.noAnimate = false; // ng-class для отключения анимации ng-show
 
-         $scope.sbLighter = 0;
+         $scope.sbLighter = 0;  // флаг посветки сайдбара при перетаскивании
+
          $scope.winHeight = $( window ).height() - 42;
          $scope.winWidth = $( window ).width();
          var collapsedToSmall = function() {
@@ -36,23 +35,22 @@ angular.module('my33app',
          };
          $scope.small = false;
          $timeout(function() { $scope.small = collapsedToSmall(); $scope.$apply(); }, 500);
+// Обработчик резайза
          $scope.clientSize = function (){
             $scope.winHeight = $( window ).height() - 42;
             $scope.winWidth = $( window ).width();
             $scope.small = collapsedToSmall();
             $scope.$apply();
          };
-
          $(window).resize($scope.clientSize);
 
+// Утиль для работы со списком превью
          $scope.addPreview = function() {
             $scope.storage.previewList.push({ hidden: false });
          };
-
          $scope.clearList = function() {
             $scope.storage.previewList = [];
          };
-
          $scope.delView = function(n){
             $scope.storage.previewList[n].hidden = true;
             $scope.$apply();
@@ -70,41 +68,32 @@ angular.module('my33app',
          var
             pp = $scope.$parent,
             dragStyles = 'transition:none;opacity:0.96;box-shadow:2px 2px 1px 0 hsla(0,0%,50%,0.6);cursor:move;',
-            staticStyles = 'transition:all ease 0.6s;opacity:1;box-shadow:none;cursor:default;',
-            showStyle = '{}',
-            hideStyle = "{display:'none';transition:'none'}";
+            staticStyles = 'transition:all ease 0.6s;opacity:1;box-shadow:none;cursor:default;';
 
          function dragStart(event) {
             if (event.which !== 1 || $scope.$parent.small || !$scope.$parent.storage.sBarShow) return;
-
             init();
-
             $scope.startX = event.clientX;
             $scope.startY = event.clientY;
-
             $scope.dZoom = 0.4 / $scope.offsetX;
-
             $scope.cloneStyles = dragStyles;
             $scope.dragOn = true;
-
             return false;
          }
 
          function init() {
             $scope.cloneX = getOffset($scope.cloneImg, 'offsetLeft');
             $scope.cloneY = getOffset($scope.cloneImg, 'offsetTop');
-//console.log("$scope.cloneX = ",$scope.cloneX);
-//console.log("$scope.cloneY = ",$scope.cloneY);
+
             $scope.targetX = getOffset($scope.targetPlace, 'offsetLeft') +
                (pp.storage.previewList.length+1) % 4 * 50;
-
             $scope.targetY = getOffset($scope.targetPlace, 'offsetTop') +
                Math.floor((pp.storage.previewList.length) / 4) * 50;
 
             $scope.sourceX = getOffset($scope.sourceImg, 'offsetLeft');
             $scope.sourceY = getOffset($scope.sourceImg, 'offsetTop');
 
-            $scope.trueOffsetX = $scope.sourceX - $scope.targetX + 2;
+// Здесь можно сделать корректировку для файрфокса (отличается смещение на 2 пикс)
             $scope.offsetX = $scope.sourceX - pp.winWidth + 204;
             $scope.offsetY = $scope.sourceY - $scope.targetY + 2;
 
@@ -171,7 +160,6 @@ angular.module('my33app',
                $scope.cloneStyles = staticStyles;
                pp.sbLighter = 0;
                $scope.$parent.$apply();
-
                $scope.dragOn = false;
                $timeout(function(){
                   pp.addPreview();
@@ -179,11 +167,6 @@ angular.module('my33app',
                }, 500);
             }
 
-
-         if(!$scope.$parent.ddHandlerOn) {
-            $scope.sourceImg.on('mousedown', dragStart);
-            $scope.$parent.ddHandlerOn = true;
-         }
          function getOffset(element, field){
             var offs = 0, el = element[0];
 //            console.log(element);
@@ -191,9 +174,13 @@ angular.module('my33app',
                offs += el[field];
                el = el.offsetParent;
             } while (el);
-
 //            console.log(field, offs);
             return offs;
+         }
+
+         if(!$scope.$parent.ddHandlerOn) {
+            $scope.sourceImg.on('mousedown', dragStart);
+            $scope.$parent.ddHandlerOn = true;
          }
       }
    ])
