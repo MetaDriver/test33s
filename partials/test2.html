@@ -28,10 +28,12 @@
                <div class="todo-content" ng-class="taskStatus($index)"
                      title="{{todo.taskText}}" >{{todo.taskText}}</div>
             </div>
+
             <!--<div class="todo-start">-->
                <!--<div class="label" ng-class="taskStatus($index)">Начало</div>-->
                <!--<div class="todo-content" ng-class="taskStatus($index)">{{}}</div>-->
             <!--</div>-->
+
             <div class="todo-end">
                <div class="label" ng-class="taskStatus($index)">Завершение</div>
                <div class="todo-content" ng-class="taskStatus($index)">{{todo.taskEnd | date:"dd.MMMM.yyyy hh:mm"}}</div>

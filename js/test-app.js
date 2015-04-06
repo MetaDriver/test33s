@@ -6,7 +6,7 @@ angular.module('my33app',
 [
    'ngAnimate',
    'ui.bootstrap',
-   'ui.utils',
+//   'ui.utils',
    'ngStorage'
 ])
    .controller('tabsCtrl', ['$scope', '$localStorage',
@@ -95,7 +95,6 @@ angular.module('my33app',
             $scope.cloneY = getOffset($scope.cloneImg, 'offsetTop');
 //console.log("$scope.cloneX = ",$scope.cloneX);
 //console.log("$scope.cloneY = ",$scope.cloneY);
-
             $scope.targetX = getOffset($scope.targetPlace, 'offsetLeft') +
                (pp.storage.previewList.length+1) % 4 * 50;
 

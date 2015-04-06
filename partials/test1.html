@@ -2,10 +2,7 @@
 
    <div id="cloneImg" ng-show="!small && storage.sBarShow" ng-controller="ddCtrl"
         style="
-         position: absolute; z-index: 999;
-              /*flex: 0 0 auto; */
-              /*min-width: 5px;min-height: 5px; */
-              border-radius: 5px;
+         position: absolute; z-index: 999; border-radius: 5px;
                transform: matrix3d( {{scale}},0,0,0,  0,{{scale}},0,0,
                   0,0,1,0, {{-2+sourceX + dX}},{{-48+sourceY + dY}},0,1);
                      {{cloneStyles}}">
