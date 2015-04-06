@@ -6,7 +6,7 @@ angular.module('my33app',
 [
    'ngAnimate',
    'ui.bootstrap',
-//   'ngDraggable',
+   'ui.utils',
    'ngStorage'
 ])
    .controller('tabsCtrl', ['$scope', '$localStorage',
@@ -29,6 +29,7 @@ angular.module('my33app',
          $scope.sourceShow = true;
          $scope.sourceShowBreak = '{}';
          $scope.srcTrans = '';
+         $scope.noAnimate = false;
 
          $scope.sbLighter = 0;
          $scope.winHeight = $( window ).height() - 42;
@@ -80,11 +81,13 @@ angular.module('my33app',
 
    .controller('ddCtrl', ['$scope', '$element','$window','$timeout',
       function($scope, $element, $window, $timeout) {
+         $scope.cloneImg = $('#cloneImg');
          $scope.sourceImg = $('#sourceImg');
+         $scope.targetPlace = $('#targetPlace');
          $scope.dragOn = false;
          var
             pp = $scope.$parent,
-            dragStyles = 'transition:none;opacity:0.85;box-shadow:4px 4px 1px 0 hsla(0,0%,50%,0.6);cursor:move;',
+            dragStyles = 'transition:none;opacity:0.96;box-shadow:2px 2px 1px 0 hsla(0,0%,50%,0.6);cursor:move;',
             staticStyles = 'transition:all ease 0.6s;opacity:1;box-shadow:none;cursor:default;',
             showStyle = '{}',
             hideStyle = "{display:'none';transition:'none'}";
@@ -96,19 +99,16 @@ angular.module('my33app',
 
             $scope.startX = event.clientX;
             $scope.startY = event.clientY;
+//
+//            $scope.zoomPX = 1;
+//            $scope.zoomPY = 1;
 
-//            $scope.offsPointX = $scope.sourceX+100 - event.clientX;
-//            $scope.offsPointY = $scope.sourceY+100 - event.clientY;
-
-            $scope.zoomPX = 1; // - $scope.offsPointX  / $scope.offsetX;   временно отключаю зум
-            $scope.zoomPY = 1; // - $scope.offsPointY  / $scope.offsetY;   потом включить!
-
-//            $scope.targetX = $scope.$parent.winWidth - $scope.startX -
-//               195 + $scope.$parent.previewList.length % 4 * 50;
-//            $scope.targetY = 120 + Math.floor($scope.$parent.previewList.length / 4) * 50 - $scope.startY;
             $scope.dZoom = 0.4 / $scope.offsetX;
 
+            $scope.cloneStyles = dragStyles;
             $scope.dragOn = true;
+
+//            pp.sourceShow = false;
 //            console.log('$scope.sBarShow = ', $scope.sBarShow);
 //            console.log('$scope.offsetX = ', $scope.offsetX);
 //            console.log('$scope.offsetY = ', $scope.offsetY);
@@ -117,62 +117,53 @@ angular.module('my33app',
 //            console.log('$element = ', $element);
             return false;
          }
-//         $element.on('mousedown', dragStart);
-         if(!$scope.$parent.ddHandlerOn) {
-            $scope.sourceImg.on('mousedown', dragStart);
-            $scope.$parent.ddHandlerOn = true;
-         }
 
          function init() {
-            $scope.targetX = getOffset($element, 'offsetLeft');
-            $scope.targetY = getOffset($element, 'offsetTop');
+            $scope.cloneX = getOffset($scope.cloneImg, 'offsetLeft');
+            $scope.cloneY = getOffset($scope.cloneImg, 'offsetTop');
+console.log("$scope.cloneX = ",$scope.cloneX);
+console.log("$scope.cloneY = ",$scope.cloneY);
+
+            $scope.targetX = getOffset($scope.targetPlace, 'offsetLeft') +
+               (pp.storage.previewList.length+1) % 4 * 50;
+
+            $scope.targetY = getOffset($scope.targetPlace, 'offsetTop') +
+               Math.floor((pp.storage.previewList.length) / 4) * 50;
+
             $scope.sourceX = getOffset($scope.sourceImg, 'offsetLeft');
             $scope.sourceY = getOffset($scope.sourceImg, 'offsetTop');
 
             $scope.trueOffsetX = $scope.sourceX - $scope.targetX + 2;
-            $scope.offsetX = $scope.sourceX - $scope.$parent.winWidth + 204;
-            $scope.offsetY = $scope.sourceY - $scope.targetY + 2 -
-               (($scope.$parent.storage.previewList.length % 4) > 0) * 50;
+            $scope.offsetX = $scope.sourceX - pp.winWidth + 204;
+            $scope.offsetY = $scope.sourceY - $scope.targetY + 2;
 
             $scope.dX = 0;
             $scope.dY = 0;
             $scope.scale = 1;
             $scope.dZoom = 0;
 
-            $scope.cloneStyles =   staticStyles;
-
             // оригинал исчезает
-//            $scope.$parent.srcTrans = 'transition:none';
-            $scope.$parent.sourceShow = false;
-            $scope.$parent.$apply();
+            pp.noAnimate = true;
+            pp.sourceShow = false;
+            pp.$apply();
 
-            function dragMove(event) {
+            $(window).on('mousemove', dragMove);
+            $(window).on('mouseup', dragEnd);
+
+         } // end init()
+
+         function dragMove(event) {
                if (!$scope.dragOn) return;
                $scope.dX = event.clientX - $scope.startX;
                $scope.dY = event.clientY - $scope.startY;
-
                $scope.scale = ($scope.dX > 0) ? 1.0 + $scope.dZoom * $scope.dX : 1;
-//               $scope.poX = ($scope.dX > 0) ? $scope.zoomPX * $scope.dX : 0;
-//               $scope.poY = ($scope.dX > 0) ? $scope.zoomPY * $scope.dX : 0;
-               $scope.poX =  0;
-               $scope.poY =  0;
-
-//               $scope.scale = ($scope.dX > 0) ? 1.0 + $scope.dZoom * $scope.dX : 1;
-
-               $scope.$parent.sbLighter =
-                  ($scope.$parent.winWidth - event.clientX) < 200 ? 50 : 0;
-
-               $scope.cloneStyles = dragStyles;
-
-               $scope.$parent.sourceShow = false;
-
-               $scope.$parent.$apply();
+               pp.sbLighter =  (pp.winWidth - event.clientX) < 200 ? 50 : 0;
+               pp.$apply();
                return false;
             }
 
             function dragEnd(event) {
                if (!$scope.dragOn) return;
-               $scope.dragOn = false;
                $(window).off('mousemove', dragMove);
                $(window).off('mouseup', dragEnd);
                if ($scope.$parent.winWidth - event.clientX > 200) {
@@ -182,45 +173,46 @@ angular.module('my33app',
                }
             }
             function dragCancel() {
-               $scope.dX = 0;
-               $scope.dY = 0;
+               $scope.dX = 3;
+               $scope.dY = 3;
                $scope.scale = 1;
 
                $scope.cloneStyles = staticStyles;
                pp.sbLighter = 0;
-               pp.sourceShowBreak = hideStyle;
-               pp.sourceShow = true;
+               $timeout(function(){
+                 $scope.dragOn = false;
+                  pp.$apply();
+               }, 250);
+               $timeout(function(){
+                  pp.sourceShow = true;
+                  pp.$apply();
+                  pp.noAnimate = false;
+               }, 550);
 
-//               $scope.sBarShowComplete = false;
-//               $scope.sourceImg.css({transform: 'matrix3d({{scale}},0,0,0, 0,{{scale}},0,0, 0,0,1,0, {{offsetX + dX - poX}},{{offsetY + dY - poY}},0,1)'});
                pp.$apply();
-               pp.sourceShowBreak = showStyle;
-//               $scope.sourceImg.css();
             }
             function dragComplete() {
-               $scope.dX = - $scope.offsetX -77 +
-                  $scope.$parent.storage.previewList.length%4*50;
-               $scope.dY =  - $scope.offsetY -127 +
-                  !($scope.$parent.storage.previewList.length % 4) * 50;
+               pp.noAnimate = false;
+               $scope.dX = - $scope.offsetX -74 +
+                  pp.storage.previewList.length%4*50;
+               $scope.dY =  - $scope.offsetY -32;
                $scope.scale = 0.2;
                $scope.cloneStyles = staticStyles;
-               $scope.$parent.sbLighter = 0;
-               $scope.$parent.sourceShow = true;
-
-               $timeout(function(){
-                  $scope.$parent.addPreview();
-                  $scope.$parent.$apply();
-               }, 1000);
-
+               pp.sbLighter = 0;
                $scope.$parent.$apply();
+
+               $scope.dragOn = false;
+               $timeout(function(){
+                  pp.addPreview();
+                  pp.sourceShow = true;
+               }, 500);
             }
 
-            $(window).on('mousemove', dragMove);
-            $(window).on('mouseup', dragEnd);
-         } // end init()
 
-
-//         $timeout(init,500);
+         if(!$scope.$parent.ddHandlerOn) {
+            $scope.sourceImg.on('mousedown', dragStart);
+            $scope.$parent.ddHandlerOn = true;
+         }
          function getOffset(element, field){
             var offs = 0, el = element[0];
 //            console.log(element);
@@ -241,7 +233,7 @@ angular.module('my33app',
    .controller('test_2_Ctrl', ['$scope', '$localStorage',
       function($scope, $localStorage) {
          $scope.storage = $localStorage;
-         $scope.newTask = function() {
+         $scope.newTask = function () {
             var current = new Date();
             return {
                taskText: '',
@@ -252,30 +244,53 @@ angular.module('my33app',
          };
          $scope.task = angular.copy($scope.newTask());
          $scope.reverseList = false;
-//         $scope.todoList = [];
-         $scope.addTask = function() {
+         $scope.addTask = function () {
             var task = angular.copy($scope.task);
             $scope.storage.todoList.unshift(task);
             $scope.task = $scope.newTask();
-
-//            console.log(angular.toJson($scope.storage.todoList[0].taskEnd));
-//            console.log(angular.toJson((new Date())));
-//            console.log($scope.taskStatus(0));
          };
-         $scope.deleteTask = function(n) {
-            $scope.storage.todoList.splice(n,1);
+         $scope.deleteTask = function (n) {
+            $scope.storage.todoList.splice(n, 1);
          };
-         $scope.taskStatus = function(n) {
+         $scope.taskStatus = function (n) {
             var current = new Date();
-            if($scope.storage.todoList[n].taskDone) return 'done';
+            if ($scope.storage.todoList[n].taskDone) return 'done';
             return (angular.toJson($scope.storage.todoList[n].taskEnd) < angular.toJson(current)) ? 'dead' : null;
          };
-//         console.log(angular.toJson($scope.storage.todoList[0].taskEnd));
-//         console.log(angular.toJson((new Date())));
-//         console.log($scope.taskStatus(0));
       }
    ])
-//   .factory('storage',function($localStorage) {
-//      return {};
-//   })
-;
+
+   .factory('timeSens', function() {
+      var msInDay = 1000*60*60*24;
+      function sensWeekDay(inpText) {
+         var wd = [
+            'понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'
+         ];
+
+      }
+      function sensMonth(inpText) {
+         var mn = [
+            'января','февраля','марта','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
+         ];
+      }
+      function sensRelativeDay(inpText) {
+         var rd = [
+            'сегодня','завтра','послезавтра','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
+         ];
+      }
+
+      function sensTime() {
+
+      }
+
+      return {
+         getSensTime: function(inpText) {
+
+         }
+      };
+
+   })
+
+
+
+; //********** END module  my33app  **************************/

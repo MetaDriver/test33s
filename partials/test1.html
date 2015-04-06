@@ -1,20 +1,36 @@
 <div class="test contur" ng-controller="test_1_Ctrl">
 
+   <div id="cloneImg" ng-show="!small && storage.sBarShow" ng-controller="ddCtrl"
+        style="
+         position: absolute; z-index: 999;
+              /*flex: 0 0 auto; */
+              /*min-width: 5px;min-height: 5px; */
+              border-radius: 5px;
+               transform: matrix3d( {{scale}},0,0,0,  0,{{scale}},0,0,
+                  0,0,1,0, {{-2+sourceX + dX}},{{-48+sourceY + dY}},0,1);
+                     {{cloneStyles}}">
+
+      <div ng-if="dragOn" class="tmb pw-place">
+         <img  src="img/200x200.jpg" />
+      </div>
+   </div>
+
    <section class="body-test-1 contur" style="overflow: visible;">
 
       <div class="square" ng-class="small ? 'small' : ''">
-         <div id="sourceImg"  ng-show="sourceShow" ng-style="sourceShowBreak">
+         <div id="sourceImg" class="scr-img" ng-show="sourceShow" ng-style="sourceShowBreak"
+               ng-class="noAnimate?'no-animate':''">
             <img src="img/200x200.jpg" />
          </div>
       </div>
 
    </section>
 
-   <section class="side-bar contur" style="overflow: visible;" ng-show="!small && storage.sBarShow">
+   <section id="targetPlace" class="side-bar contur" style="overflow: visible;" ng-show="!small && storage.sBarShow">
 
-      <div class="btn-wrapper">
+      <div class="btn-wrapper" ng-dblclick="clearList()">
          <div class="cancel-sb-button" ng-click="storage.sBarShow=false"></div>
-         <button ng-click="clearList()">Очистить список</button>
+         <!--<button ng-click="clearList()">Очистить список</button>-->
       </div>
 
       <div class="img-collect-panel" style="background-color: hsla(0,0%,{{sbLighter}}%,0.3)">
@@ -25,25 +41,8 @@
          </div>
 
 
-         <!--sBarShowComplete-->
-         <div ng-show="!small && storage.sBarShow" ng-controller="ddCtrl"
-              style="padding: 0;
-              margin: 0;
-              z-index: 999;
-              flex: 0 0 auto; min-width: 5px;min-height: 5px; border-radius: 5px;
-               transform: matrix3d(
-                  {{scale}},0,0,0,
-                  0,{{scale}},0,0,
-                  0,0,1,0,
-                  {{offsetX + dX - poX}},{{offsetY + dY - poY}},0,1);
-                     {{cloneStyles}}">
-            <!--{{offsetX + dX - poX}},{{offsetY + dY - poY}},0,1);-->
-            <div ng-if="dragOn" class="tmb pw-place">
-               <img  src="img/200x200.jpg" />
-            </div>
-         </div>
-
       </div>
+
    </section>
 
    <div class="menu" ng-click="sideBarShow()" ng-class="(storage.sBarShow || small) ? '' : 'covered'"

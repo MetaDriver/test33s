@@ -8,12 +8,17 @@
                <div>перевернуть список</div>
                <div style="flex: 1 1 auto; width: 100%"></div>
             </div>
-            <div class="input-panel">
+            <form class="input-panel" ng-submit="addTask()">
                <input type="text" placeholder=" < введите задачу >" ng-model="task.taskText" style="width: 75%">
                <!--<input type="datetime-local" placeholder=" < начало >" ng-model="task.taskStart" style="width: 25%">-->
-               <input type="datetime-local" placeholder=" < завершение >" ng-model="task.taskEnd" style="width: 25%">
-               <button class="add-btn" ng-click="addTask()">Добавить</button>
-            </div>
+               <input type="date" placeholder=" < завершение >"
+                      ng-model="task.taskEnd"
+                      min="task.taskStart"
+                      required="false"
+                      style="width: 25%">
+               <input  type="submit" value="Добавить" class="add-btn"">
+               <!-- ng-click="addTask() Добавить</button>-->
+            </form>
          </div>
          <div class="todo-item contur"  ng-class="taskStatus($index)" ng-repeat="todo in storage.todoList">
 
