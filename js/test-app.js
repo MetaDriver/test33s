@@ -188,8 +188,8 @@ angular.module('my33app',
 
    /************************* Задание 2  *******************************/
 
-   .controller('test_2_Ctrl', ['$scope', '$localStorage',
-      function($scope, $localStorage) {
+   .controller('test_2_Ctrl', ['$scope', '$localStorage', 'timeSens',
+      function($scope, $localStorage, timeSens) {
          $scope.storage = $localStorage;
          $scope.newTask = function () {
             var current = new Date();
@@ -202,7 +202,18 @@ angular.module('my33app',
          };
          $scope.task = angular.copy($scope.newTask());
          $scope.reverseList = false;
+         $scope.unSensMessage = '';
+
          $scope.addTask = function () {
+
+//            var endDate = timeSens.getSensTime($scope.task.taskText);
+//            if(!endDate) {
+//               unSensMessage = 'Дата не распознана,\nвведите корректную дату завершения';
+//               // временно:
+//               alert(unSensMessage);
+//               return;
+//            }
+
             var task = angular.copy($scope.task);
             $scope.storage.todoList.unshift(task);
             $scope.task = $scope.newTask();
@@ -238,12 +249,12 @@ angular.module('my33app',
       }
 
       function sensTime() {
-
+         return null;
       }
 
       return {
          getSensTime: function(inpText) {
-
+            return '';
          }
       };
 
