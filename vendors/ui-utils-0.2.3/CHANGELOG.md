@@ -27,7 +27,6 @@ fixes #198
 <a name="v0.2.2"></a>
 ### v0.2.2 (2015-02-18)
 
-
 #### Bug Fixes
 
 * **dep:** correct jquery 2.1.0 component path ([fd03855a](http://github.com/angular-ui/ui-utils/commit/fd03855ac336d00ce19685f4df90b862e2f5c9b4))
@@ -114,3 +113,4 @@ fixes #198
   * add and config component-publisher system ([4cea7ea5](http://github.com/angular-ui/ui-utils/commit/4cea7ea5bb4c47ad74c4f5123121a2896bf6f717))
 * **travis:** add sub component auto publishing :) ([0d64db00](http://github.com/angular-ui/ui-utils/commit/0d64db00a5c50816cbf0b022aa5607fee29d5e2a))
 
+* ************

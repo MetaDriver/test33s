@@ -153,7 +153,7 @@
 }
 .menu.covered {
     opacity: 1;
-    transition: all ease 1.5s;
+    transition: all ease 1.2s;
 }
 
 .body-test-1 {
@@ -218,7 +218,7 @@
     transition: none;
 }
 .scr-img.ng-hide-remove.ng-hide-remove-active {
-    transition: all ease 0.8s;
+    transition: all ease 0.6s;
 }
 .scr-img.no-animate.ng-hide {
     transform: none;
