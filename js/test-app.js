@@ -9,6 +9,7 @@ angular.module('my33app',
 //   'ui.utils',
    'ngStorage'
 ])
+   /****************** Контроллер табов (с инициализацией хранилища) ***************/
    .controller('tabsCtrl', ['$scope', '$localStorage',
       function($scope, $localStorage){
          $scope.$storage = $localStorage.$default({
@@ -19,6 +20,8 @@ angular.module('my33app',
          });
       }
    ])
+
+   /*****************  Задание 1  ********************/
    .controller('test_1_Ctrl', ['$scope', '$element', '$timeout', '$localStorage',
       function($scope, $element, $timeout, $localStorage) {
          $scope.storage = $localStorage;
