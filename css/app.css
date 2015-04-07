@@ -400,6 +400,7 @@
     flex-flow: column nowrap;
     justify-content: flex-start;
     align-items: stretch;
+    position: relative;
 }
 .todo-container.reverse {
     flex-direction: column-reverse;
@@ -427,6 +428,7 @@
     justify-content: flex-start;
     align-items: stretch;
     position: relative;
+    z-index: 555;
 }
 .input-panel {
     flex: 1 0 auto;
@@ -436,7 +438,8 @@
     justify-content: flex-start;
     align-items: center;
 }
-.input-panel>* {
+.input-panel>*,
+.input-panel>div {
     margin: 10px 4px 4px 4px;
     height: 28px;
     border-radius: 4px;
@@ -461,8 +464,9 @@
     padding: 2px;
 }
 .add-btn {
+    flex: 0 0 auto;
     align-self: flex-end;
-    margin: 0 0 6px -2px;
+    margin: 0 1px 8px -6px;
     height: 20px;
     width: 70px;
     font-size: 80%;
@@ -497,14 +501,15 @@
 .todo-item>div.todo-text {
     width: 75%;
 }
-.todo-item>div.todo-start,
+/*.todo-item>div.todo-start,*/
 .todo-item>div.todo-end {
-    width: 25%;
+    flex: 0 0 auto;
+    width: 162px;
 }
 .todo-item>div.todo-done {
     flex: 0 0 auto;
     align-self: flex-end;
-    margin: 0 -24px 2px -5px;
+    margin: 0 -6px 2px -5px;
     height: 28px;
     width: 78px;
     flex-flow: row nowrap;
@@ -515,12 +520,12 @@
 .todo-item>div>div.done-label {
     align-self: flex-start;
     margin: -5px 0 0 -4px;
-    padding: 1px 8px 1px 4px;
+    padding: 1px 4px 1px 4px;
     background-color: hsla(202,15%,90%,1);
     color: #447;
     font-weight: bold;
     font-size: 80%;
-    border: 1px solid hsla(202,15%,60%,1);
+    border: 1px solid hsla(202,15%,80%,1);
     border-radius: 4px 4px 4px 4px;
     position: relative;
     z-index: 5;
@@ -562,7 +567,7 @@
     height: 12px;
     width: 12px;
     border-radius: 2px;
-    box-shadow: 0 0 3px 2px hsla(111,44%,22%,0.2),inset 0 0 8px 8px hsla(22,66%,50%,0.1);
+    box-shadow: 0 0 1px 1px hsla(111,44%,20%,0.25),inset 0 0 8px 8px hsla(22,66%,50%,0.1);
     background: url("delete_12_d.png");
     /*background: url("delete_16_d.png");*/
     cursor: pointer;
@@ -574,7 +579,7 @@
     /*background: url("delete_16.png");*/
 }
 .todo-content {
-    margin: -4px 0 -2px 0;
+    margin: -3px 0 -4px 0;
     padding: 2px 4px;
     font-size: 90%;
     color: #542;

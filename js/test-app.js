@@ -85,16 +85,16 @@ angular.module('my33app',
          }
 
          function init() {
-            $scope.cloneX = getOffset($scope.cloneImg, 'offsetLeft');
-            $scope.cloneY = getOffset($scope.cloneImg, 'offsetTop');
+            $scope.cloneX = getWindowOffset($scope.cloneImg, 'offsetLeft');
+            $scope.cloneY = getWindowOffset($scope.cloneImg, 'offsetTop');
 
-            $scope.targetX = getOffset($scope.targetPlace, 'offsetLeft') +
+            $scope.targetX = getWindowOffset($scope.targetPlace, 'offsetLeft') +
                (pp.storage.previewList.length+1) % 4 * 50;
-            $scope.targetY = getOffset($scope.targetPlace, 'offsetTop') +
+            $scope.targetY = getWindowOffset($scope.targetPlace, 'offsetTop') +
                Math.floor((pp.storage.previewList.length) / 4) * 50;
 
-            $scope.sourceX = getOffset($scope.sourceImg, 'offsetLeft');
-            $scope.sourceY = getOffset($scope.sourceImg, 'offsetTop');
+            $scope.sourceX = getWindowOffset($scope.sourceImg, 'offsetLeft');
+            $scope.sourceY = getWindowOffset($scope.sourceImg, 'offsetTop');
 
 // Здесь можно сделать корректировку для файрфокса (отличается смещение на 2 пикс)
             $scope.offsetX = $scope.sourceX - pp.winWidth + 204;
@@ -143,13 +143,13 @@ angular.module('my33app',
                $scope.cloneStyles = staticStyles;
                pp.sbLighter = 0;
                $timeout(function(){
-                 $scope.dragOn = false;
                   pp.$apply();
                }, 250);
                $timeout(function(){
                   pp.sourceShow = true;
                   pp.$apply();
                   pp.noAnimate = false;
+                  $scope.dragOn = false;
                }, 550);
 
                pp.$apply();
@@ -158,19 +158,23 @@ angular.module('my33app',
                pp.noAnimate = false;
                $scope.dX = - $scope.offsetX -74 +
                   pp.storage.previewList.length%4*50;
-               $scope.dY =  - $scope.offsetY -32;
+               $scope.dY =  - $scope.offsetY -74;
                $scope.scale = 0.2;
                $scope.cloneStyles = staticStyles;
                pp.sbLighter = 0;
-               $scope.$parent.$apply();
-               $scope.dragOn = false;
+               pp.$apply();
                $timeout(function(){
                   pp.addPreview();
-                  pp.sourceShow = true;
+//                  pp.sourceShow = true;
                }, 500);
+               $timeout(function(){
+//                     pp.addPreview();
+                  pp.sourceShow = true;
+                  $scope.dragOn = false;
+               }, 800);
             }
 
-         function getOffset(element, field){
+         function getWindowOffset(element, field){
             var offs = 0, el = element[0];
 //            console.log(element);
             do {
@@ -191,15 +195,15 @@ angular.module('my33app',
 
    /************************* Задание 2  *******************************/
 
-   .controller('test_2_Ctrl', ['$scope', '$localStorage', 'timeSens',
-      function($scope, $localStorage, timeSens) {
+   .controller('test_2_Ctrl', ['$scope', '$localStorage', 'timeSens', '$filter', '$timeout', '$locale',
+      function($scope, $localStorage, timeSens, $filter, $timeout, $locale) {
          $scope.storage = $localStorage;
          $scope.newTask = function () {
-            var current = new Date();
+            var current = (new Date())*1;
             return {
                taskText: '',
                taskStart: current,
-               taskEnd: current,
+               taskEnd: null, // $filter('date')(new Date(current+timeSens.msInDay),'dd.MM.yyyy'),
                taskDone: false
             };
          };
@@ -225,10 +229,81 @@ angular.module('my33app',
             $scope.storage.todoList.splice(n, 1);
          };
          $scope.taskStatus = function (n) {
-            var current = new Date();
             if ($scope.storage.todoList[n].taskDone) return 'done';
-            return (angular.toJson($scope.storage.todoList[n].taskEnd) < angular.toJson(current)) ? 'dead' : null;
+            var current = (new Date());
+            var tEdn = new Date($scope.storage.todoList[n].taskEnd);
+//            console.log(tEdn);
+//            console.log(tEdn*1);
+            current-=current%timeSens.msInDay;
+//            console.log(current);
+
+//            console.log(current);
+            return tEdn < current*1 ? 'dead' : null;
          };
+         $locale.id = 'ru-ru';
+         $locale.DATETIME_FORMATS = {
+            MONTH:
+               'Январь,Февраль,Март,Апрель,Май,Июнь,Июль,Август,Сентябрь,Октябрь,Ноябрь,Декабрь'
+                  .split(','),
+                  SHORTMONTH:  'Янв,Фев,Мар,Апр,Мая,Июн,Июл,Авг,Сен,Окт,Ноя,Дек'.split(','),
+               DAY: 'Понедельник,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(','),
+               SHORTDAY: 'Вс,Пн,Вт,Ср,Чт,Пт,Сб'.split(','),
+               AMPMS: ['AM','PM'],
+               medium: 'MMM d, y h:mm:ss a',
+               'short': 'M/d/yy h:mm a',
+               fullDate: 'EEEE, MMMM d, y',
+               longDate: 'MMMM d, y',
+               mediumDate: 'MMM d, y',
+               shortDate: 'M/d/yy',
+               mediumTime: 'h:mm:ss a',
+               shortTime: 'h:mm a',
+               ERANAMES: [
+               "Before Christ",
+               "Anno Domini"
+            ],
+               ERAS: [
+               "BC",
+               "AD"
+            ]
+         };
+         /************************* скопировано из примера **************************/
+         $scope.today = function() {
+            $scope.dt = new Date();
+         };
+         $scope.today();
+
+         $scope.clear = function () {
+            $scope.dt = null;
+         };
+
+         // Disable weekend selection
+         $scope.disabled = function(date, mode) {
+            return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
+         };
+
+         $scope.toggleMin = function() {
+            $scope.minDate = $scope.minDate ? null : new Date();
+         };
+         $scope.toggleMin();
+
+         $scope.open = function($event) {
+            $event.preventDefault();
+            $event.stopPropagation();
+
+            $scope.opened = true;
+         };
+
+         $scope.dateOptions = {
+            formatMonth:'MMMM',
+            formatYear: 'yyyy',
+            startingDay: 1,
+            showWeeks: "false"
+         };
+
+//         $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MMM/dd', 'dd MMM yyyyг.', 'shortDate'];
+         $scope.format = 'dd MMM yyyyг.';
+//         $scope.opened = true;
+//         $timeout(function() {$scope.opened = false;},1400);
       }
    ])
 
@@ -256,6 +331,7 @@ angular.module('my33app',
       }
 
       return {
+         msInDay: msInDay,
          getSensTime: function(inpText) {
             return '';
          }

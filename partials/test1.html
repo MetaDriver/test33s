@@ -19,11 +19,13 @@
       </div>
    </section>
 
-   <section id="targetPlace" class="side-bar contur" style="overflow: visible;" ng-show="!small && storage.sBarShow">
+   <section class="side-bar contur-black" style="overflow: visible;" ng-show="!small && storage.sBarShow">
+   <!--<section id="targetPlace" class="side-bar contur-black" style="overflow: visible;" ng-show="!small && storage.sBarShow">-->
       <div class="btn-wrapper" ng-dblclick="clearList()">
          <div class="cancel-sb-button" ng-click="storage.sBarShow=false"></div>
       </div>
-      <div class="img-collect-panel" style="background-color: hsla(0,0%,{{sbLighter}}%,0.3)">
+      <div id="targetPlace" class="img-collect-panel" style="background-color: hsla(0,0%,{{sbLighter}}%,0.3)">
+      <!--<div class="img-collect-panel" style="background-color: hsla(0,0%,{{sbLighter}}%,0.3)">-->
          <div class="tmb" ng-repeat="preview in storage.previewList" ng-hide="preview.hidden">
             <div class="pv-close-button" ng-click="delView($index)"></div>
             <img src="img/40x40.jpg" />

@@ -1,40 +1,66 @@
 <div class="test contur" ng-controller="test_2_Ctrl">
 
    <section class="todo-body">
-      <div class="contur todo-container" ng-class="reverseList?'reverse':''">
-         <div class="todo-panel contur-black">
-            <div class="direct-panel">
-               <input type="checkbox" value="false" ng-model="reverseList">
-               <div>перевернуть список</div>
-               <div style="flex: 1 1 auto; width: 100%"></div>
-            </div>
+      <div class="todo-container contur " ng-class="reverseList?'reverse':''">
+         <div class="todo-panel contur-black" style="overflow: visible">
+            <!--<div class="direct-panel">-->
+               <!--<input type="checkbox" value="false" ng-model="reverseList">-->
+               <!--<div>перевернуть список</div>-->
+               <!--<div style="flex: 1 1 auto; width: 100%"></div>-->
+            <!--</div>-->
             <form class="input-panel" ng-submit="addTask()">
-               <input type="text" placeholder=" < введите задачу >" ng-model="task.taskText" style="width: 75%">
-               <input type="date" placeholder=" < завершение >"
-                      ng-model="task.taskEnd"
-                      min="task.taskStart"
-                      required="false"
-                      style="width: 25%">
-               <input  type="submit" value="Добавить" class="add-btn"">
+               <input class="form-control"
+                      type="text"
+                      placeholder=" < введите задачу >"
+                      ng-model="task.taskText"
+                      required="true"
+                      style="flex:1 1 auto">
+               <div class="input-group" style="flex:0 0 auto;width: 170px;height: 28px">
+                  <input type="text" class="form-control" style="width: 130px;height: 28px"
+                         datepicker-popup="{{format}}"
+                         placeholder="дд.ММ.гггг  чч:мм"
+                         format="dd.MM.yyyy"
+                         ng-model="task.taskEnd"
+                         is-open="opened"
+                         datepicker-options="dateOptions"
+                         date-disabled="disabled(date, mode)"
+                         ng-required="true"
+                         close-text="Закрыть"
+                         current-text="Сегодня"
+                         clear-text="Очистить"
+                         close-on-date-selection="true"
+                         datepicker-append-to-body="true"
+                         show-weeks="false"
+                        />
+                  <span class="group-btn">
+                     <button type="button" class="btn btn-default" style="width: 28px;height: 28px;padding: 2px"
+                             ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
+                  </span>
+               </div>
+
+               <input  type="submit" value="Добавить" class="add-btn">
+               <!--min="task.taskStart"-->
             </form>
          </div>
          <div class="todo-item contur"  ng-class="taskStatus($index)" ng-repeat="todo in storage.todoList">
 
             <div class="todo-text">
-               <div class="label" ng-class="taskStatus($index)">Задача
-                  <small style="font-size: 70%"> : {{todo.taskStart | date:"dd.MM.yyyy hh:mm"}}</small></div>
+               <div class="label" ng-class="taskStatus($index)">Задача  
+                  <small style="font-size: 70%;color:#779"> • {{todo.taskStart | date:"dd.MM.yyyy HH:mm"}} •</small></div>
+                  <!--<small style="font-size: 70%"> : {{Date(todo.taskStart).toLocaleString()}}</small></div>-->
+                  <!--<small style="font-size: 70%"> : {{todo.taskStart | date:"dd.MM.yyyy HH:mm"}}</small></div>-->
                <div class="todo-content" ng-class="taskStatus($index)"
                      title="{{todo.taskText}}" >{{todo.taskText}}</div>
             </div>
 
             <div class="todo-end">
                <div class="label" ng-class="taskStatus($index)">Завершение</div>
-               <div class="todo-content" ng-class="taskStatus($index)">{{todo.taskEnd | date:"dd.MMMM.yyyy hh:mm"}}</div>
+               <div class="todo-content" ng-class="taskStatus($index)">{{todo.taskEnd | date:"dd MMM yyyyг. HH:mm"}}</div>
             </div>
             <div class="todo-done">
                <input type="checkbox" value="false" ng-model="todo.taskDone">
                <div class="done-label" ng-class="taskStatus($index)"
-                    ng-click="todo.taskDone=!todo.taskDone">Cделано</div>
+                    ng-click="todo.taskDone=!todo.taskDone">Завершена</div>
             </div>
             <div class="todo-delete">
                <div ng-show="taskStatus($index)" title="удалить задачу" ng-click="deleteTask($index)"></div>
