@@ -318,7 +318,7 @@ angular.module('my33app',
          switch (this.source) {
             case '':
             case ':':
-            case '.': return false; // удаляем одиночные точки и двоеточия
+            case '.': return false; // удаляем пустоты, одиночные точки и двоеточия
             default: {
                // удаляем все строки содержащие комбинации примыкающих букв и цифр
                if(this.source.search(/\d+[a-zа-я]+|[a-zа-я]+\d+/)!=-1) return false;
@@ -338,11 +338,11 @@ angular.module('my33app',
       Token.prototype.weekDays = [
          'воскресенье,воскр',
          'понедельник,понед,пон',
-         'вторник,вт,',
-         'среду,ср',
-         'четверг,четв,',
-         'пятницу,пт,пятн',
-         'субботу,суб,сб'
+         'вторник,вторн',
+         'среду,сред',
+         'четверг,четв',
+         'пятницу,пятн,пят',
+         'субботу,субб'
       ];
       Token.prototype.month = [
          'января','февраля','марта','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
@@ -353,26 +353,32 @@ angular.module('my33app',
       Token.prototype.sensRelativeDay = function() {
          for(var i=this.relativeDays.length-1; i>=0; i--)
             if(this.source.search(this.relativeDays[i])!==-1) {
-               this.type = 'ttDate';
+               this.type = 'ttRDay';
+               this.term = 1;
                this.value = today.setDate(curD+i);
                this.valueString = (new Date(this.value)).toLocaleString();
                return true;
             }
          return false;
       };
-      Token.prototype.sensWeekDay = function() {
-         for(var i=this.weekDays.length-1; i>=0; i--)
+      Token.prototype.sensDay = function() {
+         for(var i=this.weekDays.length-1; i>=0; i--) {
             var dd = this.weekDays[i].split(',');
-            for(var j=dd.length-1; j>=0; j--)
-               if(this.source.search(dd[j])!==-1) {
-                  this.type = 'ttDate';
-                  this.value = today.setDate(curD+(i-curWD+7)%7);
+            for (var j = dd.length - 1; j >= 0; j--) {
+               if (this.source.search(dd[j]) !== -1) {
+                  this.type = 'ttDay';
+                  this.term = 1;
+//                  var d = i;
+                  this.value = new Date(today);
+                  this.value.setDate(curD + (i + 6 - curWD) % 7 + 1);
                   this.valueString = (new Date(this.value)).toLocaleString();
                   return true;
                }
+            }
+         }
          return false;
       };
-      Token.prototype.sensDay = function() {
+      Token.prototype.sensDate = function() {
          return false;
       };
       Token.prototype.sensTime = function() {
@@ -384,10 +390,10 @@ angular.module('my33app',
          if(!token.preLex()) return null;
          if(
             token.sensRelativeDay() ||
-            token.sensWeekDay() || false
+            token.sensDay() || false
             ||
             token.sensMonth() ||
-            token.sensDay() || false
+            token.sensDate() || false
             )
          return token;
          else return null;
