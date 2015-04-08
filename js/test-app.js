@@ -271,14 +271,17 @@ angular.module('my33app',
          var tcDelay = null; // promise для обнуления в случае быстрого ввода, чтоб часто не парсить
 
          $scope.taskChange = function() {  // отслеживание изменения текста таска
-            return;  // пока отключаем, чтоб закоммитить работоспособное приложение.
-            console.log('taskChange !');
+//            return;  // пока отключаем, чтоб закоммитить работоспособное приложение.
+//            console.log('taskChange !');
             var sensResult = null;
             if (tcDelay) $timeout.cancel(tcDelay);
             tcDelay = $timeout(function() {
                if(sensResult = timeSens.getSensTime($scope.task.taskText)) {
+                  sensResult = new Date(sensResult);
+                  console.log('sensResult =',sensResult.toLocaleDateString());
                   $scope.task.taskEnd = sensResult;
                   tcDelay = null;
+//                  $scope.apply();
                }
             }, 400);
          };
@@ -292,33 +295,46 @@ angular.module('my33app',
       var msInHour = 1000*60*60;
       var msInDay = msInHour*24;
       var msInWeek = msInDay*7;
+      var now = new Date();
+      var today = new Date(now-now%msInDay-msInHour*3);
+   //   today-=msInHour*3;
+      now.setHours(now.getHours()-3);
+      var curY = now.getFullYear(); // XXXX
+      var curM = now.getMonth(); // 0 - 11
+      var curD = now.getDate();  // 1 - 31
+      var curWD = now.getDay();  // 0 - 6
+      var curH = now.getHours(); // 0 - 23
+      var curm = now.getMinutes(); // 0 - 59
+
       function Token(s) {
          this.term = null;
          this.type = null;
          this.value = null;
+         this.valueString = '';
          this.source = angular.copy(s);
       }
       Token.prototype.preLex = function() {
          // берёт строку и удаляет всё ненужное
          switch (this.source) {
+            case '':
             case ':':
             case '.': return false; // удаляем одиночные точки и двоеточия
             default: {
                // удаляем все строки содержащие комбинации примыкающих букв и цифр
-
-//               if(this.source.search(/\d\w|\w\d/)!=-1) return false;
-//               if(this.source.search(/\d\w|\w\d/)!=-1) return false;
-//               if(this.source.search(/\d\w/)!=-1) return false;
-               // удаляем точки и двоеточия в начале строке
-//               while(this.source.search(/^\.+\d|^\:+\d|^\.+\w|^\:+\w/) != -1)
-//                  {this.source = this.source.slice(1);}
-//               // удаляем точки и двоеточия на конце
-//               while(this.source.search(/\w\.+$|\w\:+$|\d\.$|\d\:/) == this.source.length-1)
-//                  {this.source = this.source.slice(-1)};
+               if(this.source.search(/\d+[a-zа-я]+|[a-zа-я]+\d+/)!=-1) return false;
+//               удаляем точки и двоеточия в начале строке
+               while(this.source.search(/^\.+[\wа-я]|^\:+[\wа-я]/) != -1)
+                  {this.source = this.source.slice(1);}
+               // удаляем точки и двоеточия на конце
+               while(this.source.search(/[\wа-я]\.+$|[\wа-я]\:+$/) == this.source.length-1)
+                  {this.source = this.source.slice(-1);}
             }
          }
          return true;
       };
+      Token.prototype.relativeDays = [
+         'сегодня','завтра','послезавтра'
+      ];
       Token.prototype.weekDays = [
          'воскресенье,воскр',
          'понедельник,понед,пон',
@@ -331,47 +347,70 @@ angular.module('my33app',
       Token.prototype.month = [
          'января','февраля','марта','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
       ];
-      Token.prototype.relativeDays = [
-         'сегодня','завтра','послезавтра'
-      ];
-      Token.prototype.sensMonth = function(s) {
-//         var
+      Token.prototype.sensMonth = function() {
+        return false;
       };
-      Token.prototype.sensRelativeDay = function(s) {
-//         var rd
+      Token.prototype.sensRelativeDay = function() {
+         for(var i=this.relativeDays.length-1; i>=0; i--)
+            if(this.source.search(this.relativeDays[i])!==-1) {
+               this.type = 'ttDate';
+               this.value = today.setDate(curD+i);
+               this.valueString = (new Date(this.value)).toLocaleString();
+               return true;
+            }
+         return false;
+      };
+      Token.prototype.sensWeekDay = function() {
+         for(var i=this.weekDays.length-1; i>=0; i--)
+            var dd = this.weekDays[i].split(',');
+            for(var j=dd.length-1; j>=0; j--)
+               if(this.source.search(dd[j])!==-1) {
+                  this.type = 'ttDate';
+                  this.value = today.setDate(curD+(i-curWD+7)%7);
+                  this.valueString = (new Date(this.value)).toLocaleString();
+                  return true;
+               }
+         return false;
+      };
+      Token.prototype.sensDay = function() {
+         return false;
       };
       Token.prototype.sensTime = function() {
-         return null;
+         return false;
       };
 
       function lexer(sa) {
          var token = new Token(sa);
          if(!token.preLex()) return null;
-
+         if(
+            token.sensRelativeDay() ||
+            token.sensWeekDay() || false
+            ||
+            token.sensMonth() ||
+            token.sensDay() || false
+            )
          return token;
+         else return null;
       }
 
       function parse(tokens) {
-         var now = new Date();
-         var curY = now.getFullYear(); // XXXX
-         var curM = now.getMonth(); // 0 - 11
-         var curD = now.getDate();  // 1 - 31
-         var curWD = now.getDay();  // 0 - 6
-         var curH = now.getHours(); // 0 - 23
-         var curm = now.getMinutes(); // 0 - 59
 //         tokens = tokens;
 // парсим
-         return null;
+         return tokens;
+//         return null;
       }
 
       return {
          msInDay: msInDay,
          getSensTime: function(inpText) {
+            if(!inpText) return false;
             var delims = /[^\.\:\wа-я]/g; // разделители
 // готовим строку : переводим в набор лексем и распознаём лексемы
             var tokens =
                inpText.toLowerCase()
-                  .replace(/\. | \.|\: | \: /g,' ') // заменяем комбинации точек и двоеточий с пробелами на пробелы
+                  .replace(/\.+/g,'.')  // серия точек => одна
+                  .replace(/\:+/g,':')  // серия доеточий => одно
+                  .replace(/\.+ | \.+|\:+ | \:+/g,' ') // заменяем комбинации точек и двоеточий с пробелами на пробелы
                   .split(delims)  // сплитим и удаляем разделители
                   .map(function(s) { return lexer(s) })  // лексим
                   .filter(function(v){return!!v;});  // удаляем пустоты
@@ -379,14 +418,15 @@ angular.module('my33app',
 // отправляем массив парсеру;  // out => массив Date's
             var parseResult = parse(tokens);
 // если массив не нулевой - возвращаем наибольшую дату, иначе null
-            return (parseResult && parseResult.length) ? parseResult.sort().pop() : null;
+            return (parseResult && parseResult.length) ?
+               parseResult.sort(function(a,b){return a.value<b.value?-1:1}).pop().value : null;
          }
       };
 
    })
-
+/************************** русификация локали (для датапикера) **********************************/
    .run(function($locale){
-      //         $locale.id = 'ru-ru';
+      $locale.id = 'ru-ru';
       $locale.DATETIME_FORMATS = {
          MONTH:
             'Январь,Февраль,Март,Апрель,Май,Июнь,Июль,Август,Сентябрь,Октябрь,Ноябрь,Декабрь'

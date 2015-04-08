@@ -15,12 +15,17 @@
                       name="taskText"
                       placeholder=" < введите задачу >"
                       ng-model="task.taskText"
+                      ng-model-options="{timezone:'UTC-0300'}"
                       required="true"
                       ng-change="taskChange()"
                       style="flex:1 1 auto">
                <!--value=""-->
-               <div class="input-group" style="flex:0 0 auto;width: 170px;height: 28px">
-                  <input type="text" class="form-control" style="padding:6px;width: 130px;height: 28px"
+               <div class="input-group" style="flex:0 0 auto;width: 175px;height:28px;margin-left:0">
+                  <div class="form-control" style="padding:5px;width:130px;height:28px;margin-left:0;font-size: 13px">
+                     {{task.taskEnd | date:"dd MMM yyyy HH:mm"}}
+                  </div>
+                  <input type="text" class="form-control"
+                         style="padding:0;width: 130px;height: 28px;margin-left:-130px;position:relative;z-index:-1"
                          name="taskEndText"
                          ng-change="timeChange()"
                          datepicker-popup="{{format}}"
@@ -37,7 +42,8 @@
                          show-weeks="false"
                         />
                   <span class="group-btn">
-                     <button type="button" class="btn btn-default" style="width: 28px;height: 28px;padding: 2px"
+                     <button type="button" class="btn btn-default"
+                             style="width: 28px;height: 28px;padding: 2px;margin-left:-3px;position:relative;z-index:5"
                              ng-click="open($event)"><i class="glyphicon glyphicon-calendar"></i></button>
                   </span>
                </div>
