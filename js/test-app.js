@@ -199,12 +199,17 @@ angular.module('my33app',
    .controller('test_2_Ctrl', ['$scope', '$localStorage', 'timeSens', '$filter', '$timeout', '$locale',
       function($scope, $localStorage, timeSens, $filter, $timeout, $locale) {
          var ss = $scope.storage = $localStorage;
+         $scope.sensDate = 0;
+         $scope.pickerDate = 0;
+         $scope.tomorrow = new Date((new Date())*1+timeSens.msInDay/2);
+//         $scope.evalDate = null;
          $scope.newTask = function () {
             var current = new Date();
             return {
                taskText: '',
                taskStart: current,
-               taskEnd: null, // $filter('date')(new Date(current+timeSens.msInDay),'dd.MM.yyyy'),
+               taskEnd: $scope.tomorrow,
+//               taskEnd: null, //
                taskDone: 0
             };
          };
@@ -220,7 +225,7 @@ angular.module('my33app',
 //               return;
 //            }
             var task = angular.copy($scope.task);
-            task.taskStart *= 1; // храним в числовом виде
+            task.taskStart *= 1; // храним в сторадже в числовом виде
 
           // обрабатывает перестановку месяца и даты, когда оба они меньше или равны 12
 //
@@ -247,7 +252,6 @@ angular.module('my33app',
             current-=current%timeSens.msInDay; // округляем дату
             return tEdn < current ? 'dead' : null;  // dead, если последний день или просрочено
          };
-
 
          /************************* datePicker **************************/
 
@@ -277,16 +281,20 @@ angular.module('my33app',
             if (tcDelay) $timeout.cancel(tcDelay);
             tcDelay = $timeout(function() {
                if(sensResult = timeSens.getSensTime($scope.task.taskText)) {
-                  sensResult = new Date(sensResult);
-                  console.log('sensResult =',sensResult.toLocaleDateString());
-                  $scope.task.taskEnd = sensResult;
+                  console.log('sensResult =',(new Date(sensResult)).toLocaleDateString());
+                  $scope.sensDate = sensResult;
                   tcDelay = null;
 //                  $scope.apply();
                }
             }, 400);
          };
          $scope.timeChange = function() {  // отслеживание ручного изменения дедлайна
+//            $scope.task.taskEnd = $scope.sensDate > $scope.pickerDate ? $scope.sensDate :
+//               $scope.pickerDate || 0;
          };
+         $scope.$watch('sensDate+pickerDate',function(n,o){
+            $scope.task.taskEnd = Math.max($scope.tomorrow, $scope.sensDate, $scope.pickerDate);
+         });
       }
 ])
 /************** распознавалка **************************/
@@ -307,10 +315,12 @@ angular.module('my33app',
       var curm = now.getMinutes(); // 0 - 59
 
       function Token(s) {
+         this.pos=-1; // позиция в потоке
          this.term = null;
          this.type = null;
+         this.category = null;  // precission, year, month, day
          this.value = null;
-         this.valueString = '';
+         this.valueString = '';  // для отладки в консоли
          this.source = angular.copy(s);
       }
       Token.prototype.preLex = function() {
@@ -322,12 +332,12 @@ angular.module('my33app',
             default: {
                // удаляем все строки содержащие комбинации примыкающих букв и цифр
                if(this.source.search(/\d+[a-zа-я]+|[a-zа-я]+\d+/)!=-1) return false;
-//               удаляем точки и двоеточия в начале строке
-               while(this.source.search(/^\.+[\wа-я]|^\:+[\wа-я]/) != -1)
-                  {this.source = this.source.slice(1);}
-               // удаляем точки и двоеточия на конце
-               while(this.source.search(/[\wа-я]\.+$|[\wа-я]\:+$/) == this.source.length-1)
-                  {this.source = this.source.slice(-1);}
+////               удаляем точки и двоеточия в начале строки
+//               while(this.source.search(/^\.+[\wа-я]|^\:+[\wа-я]/) != -1)
+//                  {this.source = this.source.slice(1);}
+//               // удаляем точки и двоеточия на конце
+//               while(this.source.search(/[\wа-я]\.+$|[\wа-я]\:+$/) == this.source.length-1)
+//                  {this.source = this.source.slice(-1);}
             }
          }
          return true;
@@ -336,16 +346,27 @@ angular.module('my33app',
          'сегодня','завтра','послезавтра'
       ];
       Token.prototype.weekDays = [
-         'воскресенье,воскр',
-         'понедельник,понед,пон',
-         'вторник,вторн',
-         'среду,сред',
-         'четверг,четв',
-         'пятницу,пятн,пят',
-         'субботу,субб'
+         'воскресенье,воскр.,вск.,вс.',
+         'понедельник,понед.,пон.,пн.',
+         'вторник,вторн.,вт.',
+         'среду,ср.',
+         'четверг,четв.,чт.',
+         'пятницу,пятн.,пт.',
+         'субботу,субб.,суб.,сб.'
       ];
       Token.prototype.month = [
-         'января','февраля','марта','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
+         'января',
+         'февраля',
+         'марта',
+         'япреля',
+         'мая',
+         'июня',
+         'июля',
+         'августа',
+         'сентября',
+         'октября',
+         'ноября',
+         'декабря'
       ];
       Token.prototype.sensMonth = function() {
         return false;
@@ -378,28 +399,76 @@ angular.module('my33app',
          }
          return false;
       };
+      Token.prototype.sensDigitFullDate = function() {
+         console.log('sensDigitFullDate !');
+         var rx = /(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})/;
+         if(this.source.search(rx)==-1) return false;
+//     если найдено - разбираем
+         var rr = rx.exec(this.source);
+         var date=rr[1], month=rr[2], sYear=0, fYear=0;
+         console.log('sensDigitFullDate(1) =',date,month);
+         if(
+            (0<(date))&&(date<32) &&
+            (0<(month))&&(month<13) &&
+            (
+               ((sYear=rr[3]).length == 2)  ||
+               (curY<=(fYear=rr[3]))
+            )
+           ) {
+            this.value = new Date( month+'.'+date+'.'+(fYear?fYear:'20'+sYear));
+            this.valueString = (new Date(this.value)).toLocaleString();
+            this.type = 'ttDigitFullDate';
+            this.term = 1;
+            return true;
+         }
+         return false;
+      };
+      Token.prototype.sensNumbersGroup = function() {
+         if(this.source.search(/\d+/)==-1) return false;  // если цифр нет - выходим
+         if (
+            this.sensDigitFullDate() || false
+//            sensDigitMonth() ||
+//            sensDigitShortDate() ||
+//            sensDigitFullTime() ||
+//            sensDigitSingle()
+            )  {return true;}
+//         sensInvalidNumbersGroup();
+         return false;
+      };
+
       Token.prototype.sensDate = function() {
          return false;
       };
       Token.prototype.sensTime = function() {
          return false;
       };
-
+      // Разборка с лексемами
+      var tNumber = 0; // счётчик лексем
       function lexer(sa) {
          var token = new Token(sa);
-         if(!token.preLex()) return null;
+         if(!token.preLex()) return null; // удаляем невалидные на этот момент строки
+         token.pos = tNumber++;
+
          if(
+            token.sensNumbersGroup() ||
             token.sensRelativeDay() ||
-            token.sensDay() || false
-            ||
+            token.sensDay() ||
             token.sensMonth() ||
             token.sensDate() || false
             )
          return token;
-         else return null;
+
+         else {}
+
+         return null;
       }
 
       function parse(tokens) {
+         var year = false;
+         var month = false;
+         var week = false;
+         var date = false;
+         var day = false;
 //         tokens = tokens;
 // парсим
          return tokens;
@@ -420,7 +489,7 @@ angular.module('my33app',
                   .split(delims)  // сплитим и удаляем разделители
                   .map(function(s) { return lexer(s) })  // лексим
                   .filter(function(v){return!!v;});  // удаляем пустоты
-            console.log('tokens =',tokens);
+            console.log('tokens =',angular.copy(tokens));
 // отправляем массив парсеру;  // out => массив Date's
             var parseResult = parse(tokens);
 // если массив не нулевой - возвращаем наибольшую дату, иначе null

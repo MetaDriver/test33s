@@ -1,5 +1,5 @@
 <div class="test contur" ng-controller="test_2_Ctrl">
-
+<div>{{tomorrow | date:"dd MMM yyyyг. HH:mm"}}</div>
    <section class="todo-body">
       <div class="todo-container contur " ng-class="reverseList?'reverse':''">
          <div class="todo-panel contur-black" style="overflow: visible">
@@ -30,7 +30,7 @@
                          ng-change="timeChange()"
                          datepicker-popup="{{format}}"
                          placeholder="дд.ММ.гггг  чч:мм"
-                         ng-model="task.taskEnd"
+                         ng-model="pickerDate"
                          is-open="opened"
                          datepicker-options="dateOptions"
                          ng-required="true"
