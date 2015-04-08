@@ -407,14 +407,12 @@ angular.module('my33app',
          var rr = rx.exec(this.source);
          var date=rr[1], month=rr[2], sYear=0, fYear=0;
          console.log('sensDigitFullDate(1) =',date,month);
-         if(
-            (0<(date))&&(date<32) &&
+         if((0<(date))&&(date<32) &&
             (0<(month))&&(month<13) &&
             (
                ((sYear=rr[3]).length == 2)  ||
                (curY<=(fYear=rr[3]))
-            )
-           ) {
+           )) {
             this.value = new Date( month+'.'+date+'.'+(fYear?fYear:'20'+sYear));
             this.valueString = (new Date(this.value)).toLocaleString();
             this.type = 'ttDigitFullDate';
@@ -423,12 +421,31 @@ angular.module('my33app',
          }
          return false;
       };
+      Token.prototype.sensDigitShortDate = function() {
+         console.log('sensDigitShortDate !');
+         var rx = /(\d{1,2})\.(\d{1,2})/;
+         if(this.source.search(rx)==-1) return false;
+//     если найдено - разбираем
+         var rr = rx.exec(this.source);
+         var date=rr[1], month=rr[2];
+         console.log('sensDigitShortDate(1) =',date,month);
+         if((0<(date))&&(date<32) &&
+            (0<(month))&&(month<13)) {
+            this.value = new Date( month+'.'+date+'.'+
+               (((new Date(month+'.'+date+'.'+curY))<today)?curY+1:curY));
+            this.valueString = (new Date(this.value)).toLocaleString();
+            this.type = 'ttDigitShortDate';
+            this.term = 1;
+            return true;
+         }
+         return false;
+      };
       Token.prototype.sensNumbersGroup = function() {
          if(this.source.search(/\d+/)==-1) return false;  // если цифр нет - выходим
          if (
-            this.sensDigitFullDate() || false
+            this.sensDigitFullDate() ||
+            this.sensDigitShortDate() || false
 //            sensDigitMonth() ||
-//            sensDigitShortDate() ||
 //            sensDigitFullTime() ||
 //            sensDigitSingle()
             )  {return true;}
