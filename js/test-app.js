@@ -248,32 +248,6 @@ angular.module('my33app',
             return tEdn < current ? 'dead' : null;  // dead, если последний день или просрочено
          };
 
-//         $locale.id = 'ru-ru';
-         $locale.DATETIME_FORMATS = {
-            MONTH:
-               'Январь,Февраль,Март,Апрель,Май,Июнь,Июль,Август,Сентябрь,Октябрь,Ноябрь,Декабрь'
-                  .split(','),
-                  SHORTMONTH:  'Янв,Фев,Мар,Апр,Мая,Июн,Июл,Авг,Сен,Окт,Ноя,Дек'.split(','),
-               DAY: 'Воскресенье,Понедельник,Вторник,Среда,Четверг,Пятница,Суббота'.split(','),
-               SHORTDAY: 'Вс,Пн,Вт,Ср,Чт,Пт,Сб'.split(','),
-               AMPMS: ['до полудня','после полудня'],
-               medium: 'MMM d, y h:mm:ss a',
-               'short': 'M/d/yy h:mm a',
-               fullDate: 'EEEE, MMMM d, y',
-               longDate: 'MMMM d, y',
-               mediumDate: 'MMM d, y',
-               shortDate: 'M/d/yy',
-               mediumTime: 'h:mm:ss a',
-               shortTime: 'h:mm a',
-               ERANAMES: [
-               "до Нашей Эры",
-               "Нашей Эры"
-            ],
-               ERAS: [
-               "BC",
-               "AD"
-            ]
-         };
 
          /************************* datePicker **************************/
 
@@ -411,6 +385,33 @@ angular.module('my33app',
 
    })
 
-
+   .run(function($locale){
+      //         $locale.id = 'ru-ru';
+      $locale.DATETIME_FORMATS = {
+         MONTH:
+            'Январь,Февраль,Март,Апрель,Май,Июнь,Июль,Август,Сентябрь,Октябрь,Ноябрь,Декабрь'
+               .split(','),
+         SHORTMONTH:  'Янв,Фев,Мар,Апр,Мая,Июн,Июл,Авг,Сен,Окт,Ноя,Дек'.split(','),
+         DAY: 'Воскресенье,Понедельник,Вторник,Среда,Четверг,Пятница,Суббота'.split(','),
+         SHORTDAY: 'Вс,Пн,Вт,Ср,Чт,Пт,Сб'.split(','),
+         AMPMS: ['до полудня','после полудня'],
+         medium: 'MMM d, y h:mm:ss a',
+         'short': 'M/d/yy h:mm a',
+         fullDate: 'EEEE, MMMM d, y',
+         longDate: 'MMMM d, y',
+         mediumDate: 'MMM d, y',
+         shortDate: 'M/d/yy',
+         mediumTime: 'h:mm:ss a',
+         shortTime: 'h:mm a',
+         ERANAMES: [
+            "до Нашей Эры",
+            "Нашей Эры"
+         ],
+         ERAS: [
+            "BC",
+            "AD"
+         ]
+      };
+   })
 
 ; //********** END module  my33app  **************************/
