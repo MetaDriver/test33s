@@ -1,6 +1,7 @@
 /**
  * Created by _BOB_ on 01.04.2015.
  */
+'use strict'
 
 angular.module('my33app',
 [
@@ -197,22 +198,20 @@ angular.module('my33app',
 
    .controller('test_2_Ctrl', ['$scope', '$localStorage', 'timeSens', '$filter', '$timeout', '$locale',
       function($scope, $localStorage, timeSens, $filter, $timeout, $locale) {
-         $scope.storage = $localStorage;
+         var ss = $scope.storage = $localStorage;
          $scope.newTask = function () {
-            var current = (new Date())*1;
+            var current = new Date();
             return {
                taskText: '',
                taskStart: current,
                taskEnd: null, // $filter('date')(new Date(current+timeSens.msInDay),'dd.MM.yyyy'),
-               taskDone: false
+               taskDone: 0
             };
          };
          $scope.task = angular.copy($scope.newTask());
-         $scope.reverseList = false;
          $scope.unSensMessage = '';
 
          $scope.addTask = function () {
-
 //            var endDate = timeSens.getSensTime($scope.task.taskText);
 //            if(!endDate) {
 //               unSensMessage = 'Дата не распознана,\nвведите корректную дату завершения';
@@ -220,35 +219,44 @@ angular.module('my33app',
 //               alert(unSensMessage);
 //               return;
 //            }
-
             var task = angular.copy($scope.task);
-            $scope.storage.todoList.unshift(task);
+            task.taskStart *= 1; // храним в числовом виде
+
+          // обрабатывает перестановку месяца и даты, когда оба они меньше или равны 12
+//
+//            var dd,MM,te = task.taskEnd;
+//            if(((dd = te.getDate()) < 13) && ((MM = te.getMonth()) < 12) && MM)
+//            task.taskEnd = (new Date(te.setDate(MM+1))).setMonth(dd-1);
+
+          // постим
+            ss.todoList.push(task);
+          // сортируем
+            ss.todoList = $filter('orderBy')(ss.todoList,['taskDone','taskEnd','-taskStart','text']);
+          // обновляем форму
             $scope.task = $scope.newTask();
          };
+
+
          $scope.deleteTask = function (n) {
             $scope.storage.todoList.splice(n, 1);
          };
          $scope.taskStatus = function (n) {
-            if ($scope.storage.todoList[n].taskDone) return 'done';
-            var current = (new Date());
-            var tEdn = new Date($scope.storage.todoList[n].taskEnd);
-//            console.log(tEdn);
-//            console.log(tEdn*1);
-            current-=current%timeSens.msInDay;
-//            console.log(current);
-
-//            console.log(current);
-            return tEdn < current*1 ? 'dead' : null;
+            if (ss.todoList[n].taskDone) return 'done';
+            var current = (new Date()); // создаём переводим в число
+            var tEdn = ss.todoList[n].taskEnd;
+            current-=current%timeSens.msInDay; // округляем дату
+            return tEdn < current ? 'dead' : null;  // dead, если последний день или просрочено
          };
-         $locale.id = 'ru-ru';
+
+//         $locale.id = 'ru-ru';
          $locale.DATETIME_FORMATS = {
             MONTH:
                'Январь,Февраль,Март,Апрель,Май,Июнь,Июль,Август,Сентябрь,Октябрь,Ноябрь,Декабрь'
                   .split(','),
                   SHORTMONTH:  'Янв,Фев,Мар,Апр,Мая,Июн,Июл,Авг,Сен,Окт,Ноя,Дек'.split(','),
-               DAY: 'Понедельник,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday'.split(','),
+               DAY: 'Воскресенье,Понедельник,Вторник,Среда,Четверг,Пятница,Суббота'.split(','),
                SHORTDAY: 'Вс,Пн,Вт,Ср,Чт,Пт,Сб'.split(','),
-               AMPMS: ['AM','PM'],
+               AMPMS: ['до полудня','после полудня'],
                medium: 'MMM d, y h:mm:ss a',
                'short': 'M/d/yy h:mm a',
                fullDate: 'EEEE, MMMM d, y',
@@ -258,38 +266,20 @@ angular.module('my33app',
                mediumTime: 'h:mm:ss a',
                shortTime: 'h:mm a',
                ERANAMES: [
-               "Before Christ",
-               "Anno Domini"
+               "до Нашей Эры",
+               "Нашей Эры"
             ],
                ERAS: [
                "BC",
                "AD"
             ]
          };
-         /************************* скопировано из примера **************************/
-         $scope.today = function() {
-            $scope.dt = new Date();
-         };
-         $scope.today();
 
-         $scope.clear = function () {
-            $scope.dt = null;
-         };
-
-         // Disable weekend selection
-         $scope.disabled = function(date, mode) {
-            return ( mode === 'day' && ( date.getDay() === 0 || date.getDay() === 6 ) );
-         };
-
-         $scope.toggleMin = function() {
-            $scope.minDate = $scope.minDate ? null : new Date();
-         };
-         $scope.toggleMin();
+         /************************* datePicker **************************/
 
          $scope.open = function($event) {
             $event.preventDefault();
             $event.stopPropagation();
-
             $scope.opened = true;
          };
 
@@ -300,40 +290,122 @@ angular.module('my33app',
             showWeeks: "false"
          };
 
-//         $scope.formats = ['dd-MMMM-yyyy', 'yyyy/MMM/dd', 'dd MMM yyyyг.', 'shortDate'];
-         $scope.format = 'dd MMM yyyyг.';
-//         $scope.opened = true;
-//         $timeout(function() {$scope.opened = false;},1400);
-      }
-   ])
+         $scope.format = 'dd.MM.yyyy HH:mm';
 
+/********************************* Парсинг ***********************************/
+
+         var tcDelay = null; // promise для обнуления в случае быстрого ввода, чтоб часто не парсить
+
+         $scope.taskChange = function() {  // отслеживание изменения текста таска
+            return;  // пока отключаем, чтоб закоммитить работоспособное приложение.
+            console.log('taskChange !');
+            var sensResult = null;
+            if (tcDelay) $timeout.cancel(tcDelay);
+            tcDelay = $timeout(function() {
+               if(sensResult = timeSens.getSensTime($scope.task.taskText)) {
+                  $scope.task.taskEnd = sensResult;
+                  tcDelay = null;
+               }
+            }, 400);
+         };
+         $scope.timeChange = function() {  // отслеживание ручного изменения дедлайна
+         };
+      }
+])
+/************** распознавалка **************************/
    .factory('timeSens', function() {
-      var msInDay = 1000*60*60*24;
-      function sensWeekDay(inpText) {
-         var wd = [
-            'понедельник','вторник','среду','четверг','пятницу','субботу','воскресенье'
-         ];
 
+      var msInHour = 1000*60*60;
+      var msInDay = msInHour*24;
+      var msInWeek = msInDay*7;
+      function Token(s) {
+         this.term = null;
+         this.type = null;
+         this.value = null;
+         this.source = angular.copy(s);
       }
-      function sensMonth(inpText) {
-         var mn = [
-            'января','февраля','марта','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
-         ];
-      }
-      function sensRelativeDay(inpText) {
-         var rd = [
-            'сегодня','завтра','послезавтра','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
-         ];
+      Token.prototype.preLex = function() {
+         // берёт строку и удаляет всё ненужное
+         switch (this.source) {
+            case ':':
+            case '.': return false; // удаляем одиночные точки и двоеточия
+            default: {
+               // удаляем все строки содержащие комбинации примыкающих букв и цифр
+
+//               if(this.source.search(/\d\w|\w\d/)!=-1) return false;
+//               if(this.source.search(/\d\w|\w\d/)!=-1) return false;
+//               if(this.source.search(/\d\w/)!=-1) return false;
+               // удаляем точки и двоеточия в начале строке
+//               while(this.source.search(/^\.+\d|^\:+\d|^\.+\w|^\:+\w/) != -1)
+//                  {this.source = this.source.slice(1);}
+//               // удаляем точки и двоеточия на конце
+//               while(this.source.search(/\w\.+$|\w\:+$|\d\.$|\d\:/) == this.source.length-1)
+//                  {this.source = this.source.slice(-1)};
+            }
+         }
+         return true;
+      };
+      Token.prototype.weekDays = [
+         'воскресенье,воскр',
+         'понедельник,понед,пон',
+         'вторник,вт,',
+         'среду,ср',
+         'четверг,четв,',
+         'пятницу,пт,пятн',
+         'субботу,суб,сб'
+      ];
+      Token.prototype.month = [
+         'января','февраля','марта','япреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'
+      ];
+      Token.prototype.relativeDays = [
+         'сегодня','завтра','послезавтра'
+      ];
+      Token.prototype.sensMonth = function(s) {
+//         var
+      };
+      Token.prototype.sensRelativeDay = function(s) {
+//         var rd
+      };
+      Token.prototype.sensTime = function() {
+         return null;
+      };
+
+      function lexer(sa) {
+         var token = new Token(sa);
+         if(!token.preLex()) return null;
+
+         return token;
       }
 
-      function sensTime() {
+      function parse(tokens) {
+         var now = new Date();
+         var curY = now.getFullYear(); // XXXX
+         var curM = now.getMonth(); // 0 - 11
+         var curD = now.getDate();  // 1 - 31
+         var curWD = now.getDay();  // 0 - 6
+         var curH = now.getHours(); // 0 - 23
+         var curm = now.getMinutes(); // 0 - 59
+//         tokens = tokens;
+// парсим
          return null;
       }
 
       return {
          msInDay: msInDay,
          getSensTime: function(inpText) {
-            return '';
+            var delims = /[^\.\:\wа-я]/g; // разделители
+// готовим строку : переводим в набор лексем и распознаём лексемы
+            var tokens =
+               inpText.toLowerCase()
+                  .replace(/\. | \.|\: | \: /g,' ') // заменяем комбинации точек и двоеточий с пробелами на пробелы
+                  .split(delims)  // сплитим и удаляем разделители
+                  .map(function(s) { return lexer(s) })  // лексим
+                  .filter(function(v){return!!v;});  // удаляем пустоты
+            console.log('tokens =',tokens);
+// отправляем массив парсеру;  // out => массив Date's
+            var parseResult = parse(tokens);
+// если массив не нулевой - возвращаем наибольшую дату, иначе null
+            return (parseResult && parseResult.length) ? parseResult.sort().pop() : null;
          }
       };
 

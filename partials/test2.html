@@ -8,22 +8,26 @@
                <!--<div>перевернуть список</div>-->
                <!--<div style="flex: 1 1 auto; width: 100%"></div>-->
             <!--</div>-->
-            <form class="input-panel" ng-submit="addTask()">
+            <!--value=""-->
+            <form name="taskForm" class="input-panel" ng-submit="addTask()" ng-dblclick="storage.todoList=[]">
                <input class="form-control"
                       type="text"
+                      name="taskText"
                       placeholder=" < введите задачу >"
                       ng-model="task.taskText"
                       required="true"
+                      ng-change="taskChange()"
                       style="flex:1 1 auto">
+               <!--value=""-->
                <div class="input-group" style="flex:0 0 auto;width: 170px;height: 28px">
-                  <input type="text" class="form-control" style="width: 130px;height: 28px"
+                  <input type="text" class="form-control" style="padding:6px;width: 130px;height: 28px"
+                         name="taskEndText"
+                         ng-change="timeChange()"
                          datepicker-popup="{{format}}"
                          placeholder="дд.ММ.гггг  чч:мм"
-                         format="dd.MM.yyyy"
                          ng-model="task.taskEnd"
                          is-open="opened"
                          datepicker-options="dateOptions"
-                         date-disabled="disabled(date, mode)"
                          ng-required="true"
                          close-text="Закрыть"
                          current-text="Сегодня"
@@ -42,13 +46,12 @@
                <!--min="task.taskStart"-->
             </form>
          </div>
-         <div class="todo-item contur"  ng-class="taskStatus($index)" ng-repeat="todo in storage.todoList">
+         <div class="todo-item contur"  ng-class="taskStatus($index)"
+                              ng-repeat="todo in storage.todoList track by $index">
 
             <div class="todo-text">
                <div class="label" ng-class="taskStatus($index)">Задача  
                   <small style="font-size: 70%;color:#779"> • {{todo.taskStart | date:"dd.MM.yyyy HH:mm"}} •</small></div>
-                  <!--<small style="font-size: 70%"> : {{Date(todo.taskStart).toLocaleString()}}</small></div>-->
-                  <!--<small style="font-size: 70%"> : {{todo.taskStart | date:"dd.MM.yyyy HH:mm"}}</small></div>-->
                <div class="todo-content" ng-class="taskStatus($index)"
                      title="{{todo.taskText}}" >{{todo.taskText}}</div>
             </div>
@@ -58,9 +61,9 @@
                <div class="todo-content" ng-class="taskStatus($index)">{{todo.taskEnd | date:"dd MMM yyyyг. HH:mm"}}</div>
             </div>
             <div class="todo-done">
-               <input type="checkbox" value="false" ng-model="todo.taskDone">
+               <input type="checkbox" value="false" ng-true-value="1" ng-false-value="0" ng-model="todo.taskDone">
                <div class="done-label" ng-class="taskStatus($index)"
-                    ng-click="todo.taskDone=!todo.taskDone">Завершена</div>
+                    ng-click="todo.taskDone=(todo.taskDone+1)%2">Завершена</div>
             </div>
             <div class="todo-delete">
                <div ng-show="taskStatus($index)" title="удалить задачу" ng-click="deleteTask($index)"></div>
