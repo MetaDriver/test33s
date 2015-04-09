@@ -1,14 +1,8 @@
 <div class="test contur" ng-controller="test_2_Ctrl">
-<div>{{tomorrow | date:"dd MMM yyyyг. HH:mm"}}</div>
+<!--<div>{{tomorrow | date:"dd MMM yyyyг. HH:mm"}}</div>-->
    <section class="todo-body">
       <div class="todo-container contur " ng-class="reverseList?'reverse':''">
          <div class="todo-panel contur-black" style="overflow: visible">
-            <!--<div class="direct-panel">-->
-               <!--<input type="checkbox" value="false" ng-model="reverseList">-->
-               <!--<div>перевернуть список</div>-->
-               <!--<div style="flex: 1 1 auto; width: 100%"></div>-->
-            <!--</div>-->
-            <!--value=""-->
             <form name="taskForm" class="input-panel" ng-submit="addTask()" ng-dblclick="storage.todoList=[]">
                <input class="form-control"
                       type="text"
@@ -19,7 +13,6 @@
                       required="true"
                       ng-change="taskChange()"
                       style="flex:1 1 auto">
-               <!--value=""-->
                <div class="input-group" style="flex:0 0 auto;width: 175px;height:28px;margin-left:0">
                   <div class="form-control" style="padding:5px;width:130px;height:28px;margin-left:0;font-size: 13px">
                      {{task.taskEnd | date:"dd MMM yyyy HH:mm"}}
@@ -49,7 +42,6 @@
                </div>
 
                <input  type="submit" value="Добавить" class="add-btn">
-               <!--min="task.taskStart"-->
             </form>
          </div>
          <div class="todo-item contur"  ng-class="taskStatus($index)"

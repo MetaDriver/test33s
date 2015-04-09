@@ -199,12 +199,14 @@ angular.module('my33app',
    .controller('test_2_Ctrl', ['$scope', '$localStorage', 'timeSens', '$filter', '$timeout', '$locale',
       function($scope, $localStorage, timeSens, $filter, $timeout, $locale) {
          var ss = $scope.storage = $localStorage;
+         var watchCounter=0;  // нужен для предотвращения сброса tomorrow при загрузке (ибо $watch пару раз стреляет)
          $scope.sensDate = 0;
          $scope.pickerDate = 0;
          $scope.tomorrow = new Date((new Date())*1+timeSens.msInDay/2);
-//         $scope.evalDate = null;
          $scope.newTask = function () {
             var current = new Date();
+            $scope.tomorrow = new Date((new Date())*1+timeSens.msInDay/2);
+            watchCounter=0;
             return {
                taskText: '',
                taskStart: current,
@@ -217,21 +219,8 @@ angular.module('my33app',
          $scope.unSensMessage = '';
 
          $scope.addTask = function () {
-//            var endDate = timeSens.getSensTime($scope.task.taskText);
-//            if(!endDate) {
-//               unSensMessage = 'Дата не распознана,\nвведите корректную дату завершения';
-//               // временно:
-//               alert(unSensMessage);
-//               return;
-//            }
             var task = angular.copy($scope.task);
             task.taskStart *= 1; // храним в сторадже в числовом виде
-
-          // обрабатывает перестановку месяца и даты, когда оба они меньше или равны 12
-//
-//            var dd,MM,te = task.taskEnd;
-//            if(((dd = te.getDate()) < 13) && ((MM = te.getMonth()) < 12) && MM)
-//            task.taskEnd = (new Date(te.setDate(MM+1))).setMonth(dd-1);
 
           // постим
             ss.todoList.push(task);
@@ -272,11 +261,9 @@ angular.module('my33app',
 
 /********************************* Парсинг ***********************************/
 
-         var tcDelay = null; // promise для обнуления в случае быстрого ввода, чтоб часто не парсить
+         var tcDelay = null; // promise для обнуления в случае быстрого ввода, чтоб часто не дёргать парсер
 
          $scope.taskChange = function() {  // отслеживание изменения текста таска
-//            return;  // пока отключаем, чтоб закоммитить работоспособное приложение.
-//            console.log('taskChange !');
             var sensResult = null;
             if (tcDelay) $timeout.cancel(tcDelay);
             tcDelay = $timeout(function() {
@@ -284,16 +271,16 @@ angular.module('my33app',
                   console.log('sensResult =',(new Date(sensResult)).toLocaleDateString());
                   $scope.sensDate = sensResult;
                   tcDelay = null;
-//                  $scope.apply();
                }
             }, 400);
          };
          $scope.timeChange = function() {  // отслеживание ручного изменения дедлайна
-//            $scope.task.taskEnd = $scope.sensDate > $scope.pickerDate ? $scope.sensDate :
-//               $scope.pickerDate || 0;
          };
-         $scope.$watch('sensDate+pickerDate',function(n,o){
+         $scope.$watch('sensDate*1+pickerDate*1',function(n,o){
+            if(($scope.sensDate || $scope.pickerDate) && watchCounter > 2)
+            { $scope.tomorrow = $scope.task.taskStart; console.log('$scope.tomorrow =',$scope.tomorrow); }
             $scope.task.taskEnd = Math.max($scope.tomorrow, $scope.sensDate, $scope.pickerDate);
+            watchCounter++;
          });
       }
 ])
@@ -305,7 +292,6 @@ angular.module('my33app',
       var msInWeek = msInDay*7;
       var now = new Date();
       var today = new Date(now-now%msInDay-msInHour*3);
-   //   today-=msInHour*3;
       now.setHours(now.getHours()-3);
       var curY = now.getFullYear(); // XXXX
       var curM = now.getMonth(); // 0 - 11
@@ -318,9 +304,9 @@ angular.module('my33app',
          this.pos=-1; // позиция в потоке
          this.term = null;
          this.type = null;
-         this.category = null;  // precission, year, month, day
+//         this.category = null;  // precission, year, month, day
          this.value = null;
-         this.valueString = '';  // для отладки в консоли
+         this.valueString = '';  // для отладки в консоли. и кстати - вывод в консоль сносить не буду: ТАМ ИНТЕРЕСНО!!! ;)
          this.source = angular.copy(s);
       }
       Token.prototype.preLex = function() {
@@ -330,16 +316,7 @@ angular.module('my33app',
             case ':':
             case '.': return false; // удаляем пустоты, одиночные точки и двоеточия
             default: {
-               // удаляем все строки содержащие комбинации примыкающих букв и цифр (кроме ddddг)
                if(this.source.search(/\d+[a-zа-вд-я]+|[a-zа-я]+\d+/)!=-1) return false;
-//               if(this.source.search(/\d+[a-zа-я]+|[a-zа-я]+\d+/)!=-1) return false;
-
-////               удаляем точки и двоеточия в начале строки
-//               while(this.source.search(/^\.+[\wа-я]|^\:+[\wа-я]/) != -1)
-//                  {this.source = this.source.slice(1);}
-//               // удаляем точки и двоеточия на конце
-//               while(this.source.search(/[\wа-я]\.+$|[\wа-я]\:+$/) == this.source.length-1)
-//                  {this.source = this.source.slice(-1);}
             }
          }
          return true;
@@ -546,14 +523,6 @@ angular.module('my33app',
       function parse(tokens) {
          var fullTimeIsExist = false;
          var fullTimeValue = null;
-//         var year = false;
-//         var month = false;
-//         var week = false;
-//         var date = false;
-//         var day = false;
-//         tokens = tokens;
-// парсим  и вставляем новости по мере необходимости.
-// всё остальное просто пропускаем на выход - господь с ними разберётся :)
          for(var i=tokens.length-1; i>=0; i--) {
             if(tokens[i].type=='ttDigitFullTime') {
                // вставляем везде??  ну типатаво.  пока выставляем флаг вставки,
@@ -608,14 +577,19 @@ angular.module('my33app',
             }
          }
          return tokens;
-//         return null;
       }
-
+// factory return:
       return {
          msInDay: msInDay,
          getSensTime: function(inpText) {
             if(!inpText) return false;
             var delims = /[^\.\:\wа-я]/g; // разделители
+// БОНУСЫ:
+            if(inpText.search('когда-нибудь')!=-1) return (new Date(now.setFullYear(curY+50)));
+            if(inpText.search('потом')!=-1) return (new Date(now.setFullYear(curY+1000)));
+            if(inpText.search('никогда!')!=-1) return (new Date(now.setFullYear(curY+3)));
+// End bonuses.
+// поехали парсить.
 // готовим строку : переводим в набор лексем и распознаём лексемы
             var tokens =
                inpText.toLowerCase()
