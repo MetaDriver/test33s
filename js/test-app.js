@@ -330,8 +330,10 @@ angular.module('my33app',
             case ':':
             case '.': return false; // удаляем пустоты, одиночные точки и двоеточия
             default: {
-               // удаляем все строки содержащие комбинации примыкающих букв и цифр
-               if(this.source.search(/\d+[a-zа-я]+|[a-zа-я]+\d+/)!=-1) return false;
+               // удаляем все строки содержащие комбинации примыкающих букв и цифр (кроме ddddг)
+               if(this.source.search(/\d+[a-zа-вд-я]+|[a-zа-я]+\d+/)!=-1) return false;
+//               if(this.source.search(/\d+[a-zа-я]+|[a-zа-я]+\d+/)!=-1) return false;
+
 ////               удаляем точки и двоеточия в начале строки
 //               while(this.source.search(/^\.+[\wа-я]|^\:+[\wа-я]/) != -1)
 //                  {this.source = this.source.slice(1);}
@@ -343,43 +345,60 @@ angular.module('my33app',
          return true;
       };
       Token.prototype.relativeDays = [
-         'сегодня','завтра','послезавтра'
+         'сегодня,сегод\\.,сег\\.,сгд\\.,сг\\.',
+         'завтра,звт\\.','послезавтра,послез\\.'
       ];
       Token.prototype.weekDays = [
-         'воскресенье,воскр.,вск.,вс.',
-         'понедельник,понед.,пон.,пн.',
-         'вторник,вторн.,вт.',
-         'среду,ср.',
-         'четверг,четв.,чт.',
-         'пятницу,пятн.,пт.',
-         'субботу,субб.,суб.,сб.'
+         'воскресень,воскр\\.,^вск\\.,^вс\\.',
+         'понедельник,понед\\.,^пон\\.,пн\\.',
+         'вторник,вторн\\.,вт\\.',
+         'сред,^ср\\.',
+         'четверг,четв\\.,чт\\.',
+         'пятниц,пятн\\.,пт\\.',
+         'суббот,субб\\.,суб\\.,сб\\.'
       ];
-      Token.prototype.month = [
-         'января',
-         'февраля',
-         'марта',
-         'япреля',
-         'мая',
-         'июня',
-         'июля',
-         'августа',
-         'сентября',
-         'октября',
-         'ноября',
-         'декабря'
+      Token.prototype.monthes = [
+         'январ,^янв$,янв\\.',
+         'февр,^фев$,фвр\\.',
+         '^март$,^мар$,мрт.',
+         'апрел,^апр$,^апр\\.',
+         '^мая$,мае,^май$',
+         '^июн',
+         'июл',
+         'август,^авг$,авг\\.',
+         'сентябр,^сен$,сент\\.',
+         'октябр,октяб\\.,^окт$,окт\\.',
+         'ноябр,нояб\\.,^ноя$,ноя\\.',
+         'декабр,декаб\\.,^дек$,дек\\.'
       ];
       Token.prototype.sensMonth = function() {
+         for(var i=this.monthes.length-1; i>=0; i--) {
+            var mm = this.monthes[i].split(',');
+            for (var j = mm.length - 1; j >= 0; j--) {
+               if (this.source.search(mm[j]) !== -1) {
+                  this.type = 'ttMonth';
+                  this.term = 0;
+                  this.value = i;
+                  this.valueString = mm[j];
+                  return true;
+               }
+            }
+         }
         return false;
       };
       Token.prototype.sensRelativeDay = function() {
-         for(var i=this.relativeDays.length-1; i>=0; i--)
-            if(this.source.search(this.relativeDays[i])!==-1) {
-               this.type = 'ttRDay';
-               this.term = 1;
-               this.value = today.setDate(curD+i);
-               this.valueString = (new Date(this.value)).toLocaleString();
-               return true;
+         for(var i=this.relativeDays.length-1; i>=0; i--) {
+            var dd = this.relativeDays[i].split(',');
+            for (var j = dd.length - 1; j >= 0; j--) {
+               if(this.source.search(dd[j])!==-1) {
+                  this.type = 'ttRDay';
+                  this.term = 1;
+                  this.value = today.setDate(curD+i);
+                  this.valueString = (new Date(this.value)).toLocaleString();
+                  return true;
+               }
             }
+         }
          return false;
       };
       Token.prototype.sensDay = function() {
@@ -389,7 +408,6 @@ angular.module('my33app',
                if (this.source.search(dd[j]) !== -1) {
                   this.type = 'ttDay';
                   this.term = 1;
-//                  var d = i;
                   this.value = new Date(today);
                   this.value.setDate(curD + (i + 6 - curWD) % 7 + 1);
                   this.valueString = (new Date(this.value)).toLocaleString();
@@ -405,8 +423,8 @@ angular.module('my33app',
          if(this.source.search(rx)==-1) return false;
 //     если найдено - разбираем
          var rr = rx.exec(this.source);
-         var date=rr[1], month=rr[2], sYear=0, fYear=0;
-         console.log('sensDigitFullDate(1) =',date,month);
+         var date=rr[1], month=rr[2], sYear, fYear;
+         console.log('sensDigitFullDate(1) =',date,month,rr[3]);
          if((0<(date))&&(date<32) &&
             (0<(month))&&(month<13) &&
             (
@@ -440,16 +458,62 @@ angular.module('my33app',
          }
          return false;
       };
+      Token.prototype.sensDigitFullTime = function() {
+         console.log('sensDigitFullTime !');
+         var rx = /(\d{1,2})\:(\d{1,2})/;
+         if(this.source.search(rx)==-1) return false;
+//     если найдено - разбираем
+         var rr = rx.exec(this.source);
+         var hour=rr[1], min=rr[2];
+         console.log('sensDigitFullTime(1) =',hour,min);
+         if((hour<24) && (min<60)) {
+            this.value = [hour,min];
+            this.valueString = this.value;
+            this.type = 'ttDigitFullTime';
+            this.term = 0;
+            return true;
+         }
+         return false;
+      };
+      Token.prototype.sensDigitSingle = function() {
+         console.log('sensDigitSingle !');
+         var rx = /(\d{4}|\d{1,2})/;
+         if(this.source.search(rx)==-1) return false;
+//     если найдено - разбираем
+         var rr = rx.exec(this.source);
+         var sd=rr[1];
+         console.log('sensDigitSingle(1) =',sd);
+         if((sd.length == 4) // && (curY<=sd) удалил, так как создало проблемы
+            ) {
+            this.value = sd;
+            this.valueString = this.value;
+            this.type = 'ttDigitFullYear';
+            this.term = 0;
+            return true;
+         } else if(sd<32) {
+            this.value = sd;
+            this.valueString = this.value;
+            this.type = 'ttDigitDate';
+            this.term = 0;
+            return true;
+         } else {
+            this.value = sd;
+            this.valueString = this.value;
+            this.type = 'ttDigitShortYear';
+            this.term = 0;
+            return true;
+         }
+//         return false;
+      };
       Token.prototype.sensNumbersGroup = function() {
          if(this.source.search(/\d+/)==-1) return false;  // если цифр нет - выходим
          if (
             this.sensDigitFullDate() ||
-            this.sensDigitShortDate() || false
-//            sensDigitMonth() ||
-//            sensDigitFullTime() ||
-//            sensDigitSingle()
+            this.sensDigitShortDate() ||
+            this.sensDigitFullTime() ||
+            this.sensDigitSingle()
             )  {return true;}
-//         sensInvalidNumbersGroup();
+//         sensInvalidNumbersGroup();  // похоже лишнее... удалю потом, если не обострится.
          return false;
       };
 
@@ -464,8 +528,7 @@ angular.module('my33app',
       function lexer(sa) {
          var token = new Token(sa);
          if(!token.preLex()) return null; // удаляем невалидные на этот момент строки
-         token.pos = tNumber++;
-
+         token.pos = tNumber++; // запоминаем позицию (для парсера)
          if(
             token.sensNumbersGroup() ||
             token.sensRelativeDay() ||
@@ -481,13 +544,69 @@ angular.module('my33app',
       }
 
       function parse(tokens) {
-         var year = false;
-         var month = false;
-         var week = false;
-         var date = false;
-         var day = false;
+         var fullTimeIsExist = false;
+         var fullTimeValue = null;
+//         var year = false;
+//         var month = false;
+//         var week = false;
+//         var date = false;
+//         var day = false;
 //         tokens = tokens;
-// парсим
+// парсим  и вставляем новости по мере необходимости.
+// всё остальное просто пропускаем на выход - господь с ними разберётся :)
+         for(var i=tokens.length-1; i>=0; i--) {
+            if(tokens[i].type=='ttDigitFullTime') {
+               // вставляем везде??  ну типатаво.  пока выставляем флаг вставки,
+               // поскольку ещё возможно рождение нового терма из даты-месяца-года
+               fullTimeIsExist = true;
+               fullTimeValue = tokens[i].value;
+            }
+            if(tokens[i].type=='ttMonth') {
+               if(tokens[i-1].type=='ttDigitDate') {
+                  // ищем полный или короткий год, если находим - формируем дату с этим годом
+                  var month = tokens[i].value, date = tokens[i-1].value, year;
+                  var newToken = new Token('А вот и я!');
+                  if ((tokens[i+1] && tokens[i+1].type=='ttDigitFullYear') ||
+                      (tokens[i+1] && tokens[i+1].type=='ttDigitShortYear') ||
+                      (tokens[i+1] && tokens[i+1].type=='ttDigitDate')) {
+                     year = tokens[i+1].value;
+                     newToken.value = new Date((1+month)+'.'+date+'.'+
+                        (tokens[i+1].type=='ttDigitFullYear'?year:'20'+year));
+                     newToken.valueString = (new Date(newToken.value)).toLocaleString();
+                     newToken.type = 'ttDigitFullDate';
+                     newToken.term = 2;
+                  } else {
+                     // иначе - с текущим (или переносим на следующий, если проехали)
+                     newToken.value = new Date((1+month)+'.'+date+'.'+(((new Date((1+month)+'.'+date+'.'+curY))<today)?curY+1:curY));
+                     newToken.valueString = (new Date(newToken.value)).toLocaleString();
+                     newToken.type = 'ttDigitFullDate';
+                     newToken.term = 2;
+                  }
+                  console.log('tokens.len =',tokens.length);
+                  tokens.push(newToken);
+                  console.log('после .push(newToken) tokens.len =',tokens.length);
+                  console.log('newToken =',newToken);
+               }
+            }
+         }
+         if(fullTimeIsExist) {  // тады второй проход. вставляем это время везде. ээ.. ну почти. :)
+            console.log('fullTimeIsExist =',fullTimeIsExist);
+            for(i=tokens.length-1; i>=0; i--) {
+//               if((typeof tokens[i].value)=='ob') {
+               if(tokens[i].value && (tokens[i].value*1)!=1) {
+                  console.log('(tokens[i].value*1)!=1 => tokens[i].value =',tokens[i].value);
+                  // вставляем
+                  var dd=new Date(tokens[i].value);
+                  if(dd!='Invalid Date') {
+
+                     console.log('dd!="Invalid Date", dd =',dd);
+                     tokens[i].value = dd.setHours(fullTimeValue[0],fullTimeValue[1],0);
+                  }
+               } else { // удаляем нах, поскольку там попадаются строки, и сортировка потом проблемна
+//                  tokens.splice(i,1);
+               }
+            }
+         }
          return tokens;
 //         return null;
       }
@@ -506,9 +625,9 @@ angular.module('my33app',
                   .split(delims)  // сплитим и удаляем разделители
                   .map(function(s) { return lexer(s) })  // лексим
                   .filter(function(v){return!!v;});  // удаляем пустоты
-            console.log('tokens =',angular.copy(tokens));
 // отправляем массив парсеру;  // out => массив Date's
             var parseResult = parse(tokens);
+            console.log('tokens =',angular.copy(tokens));
 // если массив не нулевой - возвращаем наибольшую дату, иначе null
             return (parseResult && parseResult.length) ?
                parseResult.sort(function(a,b){return a.value<b.value?-1:1}).pop().value : null;
