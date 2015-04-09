@@ -541,7 +541,7 @@ angular.module('my33app',
                       (tokens[i+1] && tokens[i+1].type=='ttDigitDate')) {
                      year = tokens[i+1].value;
                      newToken.value = new Date((1+month)+'.'+date+'.'+
-                        (tokens[i+1].type=='ttDigitFullYear'?year:'20'+year));
+                        (tokens[i+1].type=='ttDigitFullYear'?year:'20'+(('0'+year).slice(-2))));
                      newToken.valueString = (new Date(newToken.value)).toLocaleString();
                      newToken.type = 'ttDigitFullDate';
                      newToken.term = 2;
