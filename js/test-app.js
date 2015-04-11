@@ -19,6 +19,9 @@ angular.module('my33app',
             sBarShow: false,
             todoList: []
          });
+         $scope.gotoGitHub = function() {
+            document.location.href='https://github.com/MetaDriver/test33s';
+         };
       }
    ])
 
@@ -522,6 +525,8 @@ angular.module('my33app',
       }
 
       function parse(tokens) {
+      // план с кодогенерацией отменяется, практически вся информация уже проставлена прямо в лексемы.
+      // потому - просто пропускаем их на выход, добавляя к ним "составные", и проставляя время (если обнаружено)
          var fullTimeIsExist = false;
          var fullTimeValue = null;
          for(var i=tokens.length-1; i>=0; i--) {
