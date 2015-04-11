@@ -199,10 +199,10 @@
     transition: all ease 0.6s;
     position: relative;
     transform: matrix3d(
-        1,0,0,0,
-        0,1,0,0,
-        0,0,1,0,
-        0,0,0,1
+            1,0,0,0,
+            0,1,0,0,
+            0,0,1,0,
+            0,0,0,1
     );
 }
 .scr-img.ng-hide {
@@ -391,8 +391,8 @@
     height: 100%;
     overflow-y: auto;
 /*коммент к max-height: это ослабление гибкости вёрстки из-за бага файрфокса. */
+    /* файрфокс не рисует скроллбар во флексбоксе при переполнении при указании высоты в процентах */
         max-height: calc(100vh - 86px);
-/* файрфокс не рисует скроллбар во флексбоксе при переполнении при указании высоты в процентах */
 /* в хромиумах правильно работает и без этой строки.   // end comment  */
     padding: 4px;
     background-color: hsla(0, 0%, 99%, 0.15);
@@ -462,6 +462,16 @@
 .direct-panel>div {
     flex: 0 0 auto;
     padding: 2px;
+}
+.form-control.picker-win {
+    padding:4px;
+    width: 130px;
+    height: 28px;
+    font-size: 90%;
+    /*border-color: hsla(0,0%,100%,0.01);*/
+    border-radius: 3px 0 0 3px;
+    margin-left:10px;
+    position:relative;z-index:1
 }
 .add-btn {
     flex: 0 0 auto;

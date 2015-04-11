@@ -86,16 +86,16 @@ angular.module('my33app',
          }
 
          function init() {
-            $scope.cloneX = getWindowOffset($scope.cloneImg, 'offsetLeft');
-            $scope.cloneY = getWindowOffset($scope.cloneImg, 'offsetTop');
+            $scope.cloneX = getAbsOffset($scope.cloneImg, 'offsetLeft');
+            $scope.cloneY = getAbsOffset($scope.cloneImg, 'offsetTop');
 
-            $scope.targetX = getWindowOffset($scope.targetPlace, 'offsetLeft') +
+            $scope.targetX = getAbsOffset($scope.targetPlace, 'offsetLeft') +
                (pp.storage.previewList.length+1) % 4 * 50;
-            $scope.targetY = getWindowOffset($scope.targetPlace, 'offsetTop') +
+            $scope.targetY = getAbsOffset($scope.targetPlace, 'offsetTop') +
                Math.floor((pp.storage.previewList.length) / 4) * 50;
 
-            $scope.sourceX = getWindowOffset($scope.sourceImg, 'offsetLeft');
-            $scope.sourceY = getWindowOffset($scope.sourceImg, 'offsetTop');
+            $scope.sourceX = getAbsOffset($scope.sourceImg, 'offsetLeft');
+            $scope.sourceY = getAbsOffset($scope.sourceImg, 'offsetTop');
 
 // Здесь можно сделать корректировку для файрфокса (отличается смещение на 2 пикс)
             $scope.offsetX = $scope.sourceX - pp.winWidth + 204;
@@ -175,7 +175,7 @@ angular.module('my33app',
                }, 800);
             }
 
-         function getWindowOffset(element, field){
+         function getAbsOffset(element, field){
             var offs = 0, el = element[0];
 //            console.log(element);
             do {
@@ -199,18 +199,18 @@ angular.module('my33app',
    .controller('test_2_Ctrl', ['$scope', '$localStorage', 'timeSens', '$filter', '$timeout', '$locale',
       function($scope, $localStorage, timeSens, $filter, $timeout, $locale) {
          var ss = $scope.storage = $localStorage;
-         var watchCounter=0;  // нужен для предотвращения сброса tomorrow при загрузке (ибо $watch пару раз стреляет)
+         var watchCounter=0;  // нужен для предотвращения сброса defaultEnd при загрузке (ибо $watch пару раз стреляет)
          $scope.sensDate = 0;
          $scope.pickerDate = 0;
-         $scope.tomorrow = new Date((new Date())*1+timeSens.msInDay/2);
+         $scope.defaultEnd = new Date((new Date())*1+timeSens.msInDay/2);
          $scope.newTask = function () {
             var current = new Date();
-            $scope.tomorrow = new Date((new Date())*1+timeSens.msInDay/2);
+            $scope.defaultEnd = new Date((new Date())*1+timeSens.msInDay/2);
             watchCounter=0;
             return {
                taskText: '',
                taskStart: current,
-               taskEnd: $scope.tomorrow,
+               taskEnd: $scope.defaultEnd,
 //               taskEnd: null, //
                taskDone: 0
             };
@@ -236,10 +236,10 @@ angular.module('my33app',
          };
          $scope.taskStatus = function (n) {
             if (ss.todoList[n].taskDone) return 'done';
-            var current = (new Date()); // создаём переводим в число
-            var tEdn = ss.todoList[n].taskEnd;
-            current-=current%timeSens.msInDay; // округляем дату
-            return tEdn < current ? 'dead' : null;  // dead, если последний день или просрочено
+            var current = (new Date())*1 + timeSens.msInDay; // создаём, переводим в число и добавляем сутки
+            current -= current % timeSens.msInDay; // округляем дату
+            console.log('taskStatus : current=',current, 'ss.todoList['+n+'].taskEnd',ss.todoList[n].taskEnd);
+            return ss.todoList[n].taskEnd < current ? 'dead' : null;  // dead, если последний день или просрочено
          };
 
          /************************* datePicker **************************/
@@ -274,12 +274,12 @@ angular.module('my33app',
                }
             }, 400);
          };
-         $scope.timeChange = function() {  // отслеживание ручного изменения дедлайна
+         $scope.pickerChange = function() {  // отслеживание ручного изменения дедлайна
          };
          $scope.$watch('sensDate*1+pickerDate*1',function(n,o){
-            if(($scope.sensDate || $scope.pickerDate) && watchCounter > 2)
-            { $scope.tomorrow = $scope.task.taskStart; console.log('$scope.tomorrow =',$scope.tomorrow); }
-            $scope.task.taskEnd = Math.max($scope.tomorrow, $scope.sensDate, $scope.pickerDate);
+            if(($scope.sensDate || $scope.pickerDate) && watchCounter > 1)
+            { $scope.defaultEnd = $scope.task.taskStart; console.log('$scope.defaultEnd =',$scope.defaultEnd); }
+            $scope.task.taskEnd = Math.max($scope.defaultEnd, $scope.sensDate, $scope.pickerDate);
             watchCounter++;
          });
       }
@@ -396,7 +396,7 @@ angular.module('my33app',
          return false;
       };
       Token.prototype.sensDigitFullDate = function() {
-         console.log('sensDigitFullDate !');
+//         console.log('sensDigitFullDate !');
          var rx = /(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2})/;
          if(this.source.search(rx)==-1) return false;
 //     если найдено - разбираем
@@ -418,7 +418,7 @@ angular.module('my33app',
          return false;
       };
       Token.prototype.sensDigitShortDate = function() {
-         console.log('sensDigitShortDate !');
+//         console.log('sensDigitShortDate !');
          var rx = /(\d{1,2})\.(\d{1,2})/;
          if(this.source.search(rx)==-1) return false;
 //     если найдено - разбираем
@@ -437,7 +437,7 @@ angular.module('my33app',
          return false;
       };
       Token.prototype.sensDigitFullTime = function() {
-         console.log('sensDigitFullTime !');
+//         console.log('sensDigitFullTime !');
          var rx = /(\d{1,2})\:(\d{1,2})/;
          if(this.source.search(rx)==-1) return false;
 //     если найдено - разбираем
@@ -454,15 +454,14 @@ angular.module('my33app',
          return false;
       };
       Token.prototype.sensDigitSingle = function() {
-         console.log('sensDigitSingle !');
+//         console.log('sensDigitSingle !');
          var rx = /(\d{4}|\d{1,2})/;
          if(this.source.search(rx)==-1) return false;
 //     если найдено - разбираем
          var rr = rx.exec(this.source);
          var sd=rr[1];
-         console.log('sensDigitSingle(1) =',sd);
-         if((sd.length == 4) // && (curY<=sd) удалил, так как создало проблемы
-            ) {
+//         console.log('sensDigitSingle(1) =',sd);
+         if(sd.length == 4) {
             this.value = sd;
             this.valueString = this.value;
             this.type = 'ttDigitFullYear';
@@ -562,7 +561,6 @@ angular.module('my33app',
          if(fullTimeIsExist) {  // тады второй проход. вставляем это время везде. ээ.. ну почти. :)
             console.log('fullTimeIsExist =',fullTimeIsExist);
             for(i=tokens.length-1; i>=0; i--) {
-//               if((typeof tokens[i].value)=='ob') {
                if(tokens[i].value && (tokens[i].value*1)!=1) {
                   console.log('(tokens[i].value*1)!=1 => tokens[i].value =',tokens[i].value);
                   // вставляем

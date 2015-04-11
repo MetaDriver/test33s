@@ -1,5 +1,5 @@
 <div class="test contur" ng-controller="test_2_Ctrl">
-<!--<div>{{tomorrow | date:"dd MMM yyyyг. HH:mm"}}</div>-->
+<!--<div>{{defaultEnd | date:"dd MMM yyyyг. HH:mm"}}</div>-->
    <section class="todo-body">
       <div class="todo-container contur " ng-class="reverseList?'reverse':''">
          <div class="todo-panel contur-black" style="overflow: visible">
@@ -13,12 +13,12 @@
                       required="true"
                       ng-change="taskChange()"
                       style="flex:1 1 auto">
-               <div class="input-group" style="flex:0 0 auto;width: 175px;height:28px;margin-left:0">
-                  <div class="form-control" style="padding:5px;width:130px;height:28px;margin-left:0;font-size: 13px">
+               <div class="input-group" style="flex:0 0 auto;width: 178px;height:28px;margin-left:0">
+                  <div class="form-control picker-win">
                      {{task.taskEnd | date:"dd MMM yyyy HH:mm"}}
                   </div>
                   <input type="text" class="form-control"
-                         style="padding:0;width: 130px;height: 28px;margin-left:-130px;position:relative;z-index:-1"
+                         style="padding:0;width: 130px;height: 28px;margin-left:-130px;position:relative;z-index:-1;    border-radius: 3px 0 0 3px;"
                          name="taskEndText"
                          ng-change="timeChange()"
                          datepicker-popup="{{format}}"
