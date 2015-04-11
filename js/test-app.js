@@ -236,9 +236,10 @@ angular.module('my33app',
          };
          $scope.taskStatus = function (n) {
             if (ss.todoList[n].taskDone) return 'done';
-            var current = (new Date())*1 + timeSens.msInDay; // создаём, переводим в число и добавляем сутки
-            current -= current % timeSens.msInDay; // округляем дату
-            console.log('taskStatus : current=',current, 'ss.todoList['+n+'].taskEnd',ss.todoList[n].taskEnd);
+            var current = (new Date())*1; // создаём, переводим в число
+            current -= current % timeSens.msInDay; // округляем
+            current += timeSens.msInDay-3*60*60*1000; //  добавляем сутки минус три часа
+//            console.log('taskStatus : current=',new Date(current), 'ss.todoList['+n+'].taskEnd',new Date(ss.todoList[n].taskEnd));
             return ss.todoList[n].taskEnd < current ? 'dead' : null;  // dead, если последний день или просрочено
          };
 
