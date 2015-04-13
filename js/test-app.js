@@ -310,7 +310,7 @@ angular.module('my33app',
          this.type = null;
 //         this.category = null;  // precission, year, month, day
          this.value = null;
-         this.valueString = '';  // для отладки в консоли. и кстати - вывод в консоль сносить не буду: ТАМ ИНТЕРЕСНО!!! ;)
+         this.valueString = '';  // для отладки в консоли. вывод в консоль сносить не буду: ТАМ ИНТЕРЕСНО!!! ;)
          this.source = angular.copy(s);
       }
       Token.prototype.preLex = function() {
@@ -612,7 +612,6 @@ angular.module('my33app',
                parseResult.sort(function(a,b){return a.value<b.value?-1:1}).pop().value : null;
          }
       };
-
    })
 /************************** русификация локали (для датапикера) **********************************/
    .run(function($locale){
